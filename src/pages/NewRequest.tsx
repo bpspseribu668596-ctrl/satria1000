@@ -21,7 +21,7 @@ export default function NewRequest() {
   const [users, setUsers] = useState<any[]>([]);
   const [itemsWithStock, setItemsWithStock] = useState<(ATKItem & { stock: number })[]>([]);
   const [items, setItems] = useState<RequestItem[]>([{ itemId: 0, name: "", quantity: 1, unit: "" }]);
-  const [location, setLocation] = useState("Jakarta Selatan");
+  const [location, setLocation] = useState("Kepulauan Seribu");
   const [documentDate, setDocumentDate] = useState(new Date().toISOString().split("T")[0]);
   const [bookDate, setBookDate] = useState(new Date().toISOString().split("T")[0]);
   const [fungsiBagian, setFungsiBagian] = useState("");
@@ -151,6 +151,7 @@ export default function NewRequest() {
     }
   };
 
+  const canSelectRequester = user?.role?.some(r => ["admin", "operator"].includes(r)) ?? false;
   const addItem = () => setItems([...items, { itemId: 0, name: "", quantity: 1, unit: "" }]);
   const removeItem = (i: number) => items.length > 1 && setItems(items.filter((_, idx) => idx !== i));
   const openItemSelector = (i: number) => { setSelectedIndex(i); setSearchQuery(""); setShowItemModal(true); };
@@ -208,7 +209,7 @@ export default function NewRequest() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-800">Buat Permintaan ATK</h1>
 
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
@@ -216,7 +217,7 @@ export default function NewRequest() {
           {settings?.logo_url && <img src={settings.logo_url} className="h-12 w-12 object-contain" alt="Logo" />}
           <div>
             <h2 className="font-bold text-slate-800 uppercase">Formulir Permintaan ATK</h2>
-            <p className="text-sm text-slate-500">{settings?.org_name || "BPS Jakarta Selatan"}</p>
+            <p className="text-sm text-slate-500">{settings?.org_name || "BPS Kepulauan Seribu"}</p>
           </div>
         </div>
 
@@ -236,19 +237,16 @@ export default function NewRequest() {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Lokasi Pengajuan</label>
-                <input type="text" placeholder="Lokasi (misal: Jakarta Selatan)" value={location} onChange={e => setLocation(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm" required />
+                <input type="text" placeholder="Lokasi (misal: Kepulauan Seribu)" value={location} onChange={e => setLocation(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm" required />
               </div>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-bold text-slate-700">Data Pemohon</label>
-                <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded border border-blue-200">
-                  Pilih User DB
-                </span>
               </div>
 
-              {users.length > 0 && (
+              {canSelectRequester && users.length > 0 && (
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1">Pilih dari Database User</label>
                   <select
@@ -268,11 +266,18 @@ export default function NewRequest() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1">Nama Pemohon</label>
-                  <input type="text" placeholder="Nama Pemohon" value={requesterName} onChange={e => setRequesterName(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" required />
+                  <input type="text" placeholder="Nama Pemohon" value={requesterName}
+                    onChange={e => canSelectRequester && setRequesterName(e.target.value)}
+                    readOnly={!canSelectRequester}
+                    className={`w-full px-3 py-2.5 rounded-xl border border-slate-200 outline-none text-sm font-medium ${!canSelectRequester ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500"}`}
+                    required />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 mb-1">NIP</label>
-                  <input type="text" placeholder="NIP" value={requesterNIP} onChange={e => setRequesterNIP(e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium" />
+                  <input type="text" placeholder="NIP" value={requesterNIP}
+                    onChange={e => canSelectRequester && setRequesterNIP(e.target.value)}
+                    readOnly={!canSelectRequester}
+                    className={`w-full px-3 py-2.5 rounded-xl border border-slate-200 outline-none text-sm font-medium ${!canSelectRequester ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500"}`} />
                 </div>
               </div>
 
@@ -280,10 +285,11 @@ export default function NewRequest() {
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Fungsi / Bagian (Unit Kerja)</label>
                 <input
                   type="text"
-                  placeholder="Fungsi / Bagian (otomatis terisi dari User)"
+                  placeholder="Fungsi / Bagian"
                   value={fungsiBagian}
-                  onChange={e => setFungsiBagian(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                  onChange={e => canSelectRequester && setFungsiBagian(e.target.value)}
+                  readOnly={!canSelectRequester}
+                  className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none text-sm ${!canSelectRequester ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "focus:ring-2 focus:ring-blue-500"}`}
                   required
                 />
               </div>

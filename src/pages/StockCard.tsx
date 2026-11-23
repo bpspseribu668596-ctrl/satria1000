@@ -564,8 +564,8 @@ export default function StockCard() {
           </div>
           <div className="p-4 grid grid-cols-2 gap-4 text-[10px] border-b border-slate-200 print:p-2 print:text-[8.5px] print:leading-tight">
             <div>
-              <p><strong>NAMA UAKPB</strong>: BADAN PUSAT STATISTIK JAKARTA SELATAN</p>
-              <p><strong>KODE UAKPB</strong>: 054.01.0100.539163</p>
+              <p><strong>NAMA UAKPB</strong>: BADAN PUSAT STATISTIK KEPULAUAN SERIBU</p>
+              <p><strong>KODE UAKPB</strong>: 054.01.0100.539164</p>
               <p><strong>METODE PENCATATAN</strong>: PERPETUAL</p>
               <p><strong>METODE PENILAIAN</strong>: FIFO</p>
             </div>
@@ -630,7 +630,7 @@ export default function StockCard() {
                 </div>
                 <div className="space-y-0.5 leading-tight text-slate-700">
                   <div className="font-bold uppercase tracking-wider text-black text-[8px]">
-                    Otentikasi Kartu Kendali Digital &bull; SATRIA BPS Kota Jakarta Selatan
+                    Otentikasi Kartu Kendali Digital &bull; SATRIA BPS Kepulauan Seribu
                   </div>
                   <div className="text-[7.5px]">
                     Kartu Kendali Persediaan ini dicatat dan diverifikasi secara elektronik melalui Sistem SATRIA ATK.
@@ -661,8 +661,8 @@ export default function StockCard() {
               </div>
               <div className="p-4 grid grid-cols-2 gap-4 text-[10px] border-b border-slate-200 print:p-2 print:text-[8.5px] print:leading-tight">
                 <div>
-                  <p><strong>NAMA UAKPB</strong>: BADAN PUSAT STATISTIK JAKARTA SELATAN</p>
-                  <p><strong>KODE UAKPB</strong>: 054.01.0100.539163</p>
+                  <p><strong>NAMA UAKPB</strong>: BADAN PUSAT STATISTIK KEPULAUAN SERIBU</p>
+                  <p><strong>KODE UAKPB</strong>: 054.01.0100.539164</p>
                   <p><strong>METODE PENCATATAN</strong>: PERPETUAL</p>
                   <p><strong>METODE PENILAIAN</strong>: FIFO</p>
                 </div>
@@ -726,7 +726,7 @@ export default function StockCard() {
                     </div>
                     <div className="space-y-0.5 leading-tight text-slate-700">
                       <div className="font-bold uppercase tracking-wider text-black text-[8px]">
-                        Otentikasi Kartu Kendali Digital &bull; SATRIA BPS Kota Jakarta Selatan
+                        Otentikasi Kartu Kendali Digital &bull; SATRIA BPS Kepulauan Seribu
                       </div>
                       <div className="text-[7.5px]">
                         Kartu Kendali Persediaan ini dicatat dan diverifikasi secara elektronik melalui Sistem SATRIA ATK.

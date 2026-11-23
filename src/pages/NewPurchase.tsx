@@ -106,7 +106,12 @@ export default function NewPurchase() {
         return;
       }
 
+      const masterNames = new Map(
+        masterItems.map(i => [i.name.toLowerCase(), i])
+      );
+
       const importedItems: ItemRow[] = [];
+      const skippedItems: string[] = [];
 
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
@@ -114,27 +119,36 @@ export default function NewPurchase() {
 
         const itemName = String(row[0] || "").trim();
         const quantity = parseFloat(row[1]) || 0;
-        const unit = String(row[2] || "pcs").trim();
         const unitPrice = parseFloat(row[3]) || 0;
 
-        if (itemName && quantity > 0) {
-          importedItems.push({
-            item_name: itemName,
-            quantity,
-            unit,
-            unit_price: unitPrice,
-            total: quantity * unitPrice,
-          });
+        if (!itemName || quantity <= 0) continue;
+
+        // Validasi: hanya item yang ada di Master ATK yang boleh masuk
+        const masterItem = masterNames.get(itemName.toLowerCase());
+        if (!masterItem) {
+          skippedItems.push(itemName);
+          continue;
         }
+
+        importedItems.push({
+          item_name: masterItem.name,       // pakai nama dari master agar konsisten
+          quantity,
+          unit: masterItem.unit,            // pakai satuan dari master
+          unit_price: unitPrice,
+          total: quantity * unitPrice,
+        });
       }
 
-      if (importedItems.length === 0) {
-        alert("Tidak ada item valid yang ditemukan di file Excel");
-        return;
+      if (importedItems.length > 0) {
+        setItems(importedItems);
       }
 
-      setItems(importedItems);
-      alert(`Berhasil mengimpor ${importedItems.length} barang dari Excel!`);
+      // Pesan ringkasan
+      const lines: string[] = [];
+      if (importedItems.length > 0) lines.push(`✅ ${importedItems.length} barang berhasil diimpor.`);
+      if (skippedItems.length > 0) lines.push(`⚠️ ${skippedItems.length} barang dilewati karena tidak ada di Master ATK:\n  - ${skippedItems.join("\n  - ")}`);
+      if (importedItems.length === 0 && skippedItems.length === 0) lines.push("Tidak ada data valid yang ditemukan di file Excel.");
+      alert(lines.join("\n\n"));
     } catch (err) {
       alert("Gagal membaca file Excel: " + (err as Error).message);
     } finally {

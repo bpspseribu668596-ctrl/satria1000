@@ -389,8 +389,8 @@ export default function InventoryReport() {
       ["BADAN PUSAT STATISTIK : UAPB"],
       ["BADAN PUSAT STATISTIK : UAPPB-E1"],
       ["SEKRETARIAT UTAMA BADAN PUSAT STATISTIK : UAPPB-W"],
-      ["KODE UAKPB : 054.01.0100.539163"],
-      ["NAMA UAKPB : BADAN PUSAT STATISTIK JAKARTA SELATAN"],
+      ["KODE UAKPB : 054.01.0100.539164"],
+      ["NAMA UAKPB : BADAN PUSAT STATISTIK KEPULAUAN SERIBU"],
       [""],
       ["LAPORAN RINCIAN BARANG PERSEDIAAN"],
       [`UNTUK PERIODE YANG BERAKHIR TANGGAL ${cutOffDate}`],
@@ -706,10 +706,10 @@ export default function InventoryReport() {
           <div>BADAN PUSAT STATISTIK : UAPPB-E1</div>
           <div className="pt-1">
             <span className="font-semibold">NAMA UAKPB : </span>BADAN PUSAT
-            STATISTIK JAKARTA SELATAN
+            STATISTIK KEPULAUAN SERIBU
           </div>
           <div>
-            <span className="font-semibold">KODE UAKPB : </span>054.01.0100.539163
+            <span className="font-semibold">KODE UAKPB : </span>054.01.0100.539164
           </div>
         </div>
 

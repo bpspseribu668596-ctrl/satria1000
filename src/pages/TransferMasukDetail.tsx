@@ -416,7 +416,7 @@ export default function TransferMasukDetail() {
           />
           <div className="flex-1 text-center">
             <h1 className="text-sm font-extrabold uppercase tracking-widest text-black">
-              {settings?.org_name || "BADAN PUSAT STATISTIK KOTA JAKARTA SELATAN"}
+              {settings?.org_name || "BADAN PUSAT STATISTIK KEPULAUAN SERIBU"}
             </h1>
             <h2 className="text-base font-black uppercase tracking-wide text-black mt-0.5">
               BUKTI PENERIMAAN BARANG MUTASI MASUK (BPB)
@@ -516,7 +516,7 @@ export default function TransferMasukDetail() {
           <div className="flex justify-between items-start text-xs text-black">
             <div className="text-center w-64">
               <p className="font-semibold text-slate-700">Petugas Pengurus Barang Penerima,</p>
-              <p className="font-bold text-black uppercase mt-0.5">BPS KOTA JAKARTA SELATAN</p>
+              <p className="font-bold text-black uppercase mt-0.5">BPS KEPULAUAN SERIBU</p>
               <div className="h-20"></div>
               <p className="font-bold border-b border-black inline-block min-w-[180px] pb-0.5">
                 ( .................................................. )

@@ -289,7 +289,7 @@ export default function PublicVerifyStockCard() {
           <div className="w-12 h-12 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <h2 className="text-lg font-bold text-slate-800">Memverifikasi Kartu Kendali...</h2>
           <p className="text-xs text-slate-500 mt-1">
-            Mengambil data mutasi persediaan SATRIA BPS Kota Jakarta Selatan
+            Mengambil data mutasi persediaan SATRIA BPS Kepulauan Seribu
           </p>
         </div>
       </div>
@@ -331,7 +331,7 @@ export default function PublicVerifyStockCard() {
             )}
             <div>
               <h1 className="font-extrabold text-sm uppercase tracking-wide text-slate-900">
-                {settings?.org_name || "BPS Kota Jakarta Selatan"}
+                {settings?.org_name || "BPS Kepulauan Seribu"}
               </h1>
               <p className="text-xs text-cyan-700 font-semibold">
                 Sistem Informasi Pengelolaan ATK (SATRIA)
@@ -388,7 +388,7 @@ export default function PublicVerifyStockCard() {
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block text-[11px]">Kode UAKPB</span>
-                  <span className="font-bold text-slate-800 font-mono">054.01.0100.539163</span>
+                  <span className="font-bold text-slate-800 font-mono">054.01.0100.539164</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block text-[11px]">Metode Pencatatan</span>
@@ -554,7 +554,7 @@ export default function PublicVerifyStockCard() {
                     Otentikasi Digital
                   </span>
                   <div className="font-bold text-slate-800">
-                    Sistem SATRIA BPS Kota Jakarta Selatan
+                    Sistem SATRIA BPS Kepulauan Seribu
                   </div>
                   <div className="text-[11px] text-slate-500">
                     Dicatat secara elektronik dan sah sesuai kaidah penatausahaan persediaan BMN.
@@ -598,7 +598,7 @@ export default function PublicVerifyStockCard() {
         {/* Legal Disclaimer */}
         <p className="text-center text-slate-400 text-[11px] leading-relaxed">
           Dokumen verifikasi ini diterbitkan secara otomatis melalui Sistem Informasi SATRIA
-          Badan Pusat Statistik Kota Jakarta Selatan dan diakui secara sah untuk keperluan
+          Badan Pusat Statistik Kepulauan Seribu dan diakui secara sah untuk keperluan
           pemeriksaan, rekonsiliasi, dan audit persediaan BMN.
         </p>
       </div>

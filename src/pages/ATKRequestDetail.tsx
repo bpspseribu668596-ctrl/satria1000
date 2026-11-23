@@ -289,7 +289,7 @@ Mohon segera ditindaklanjuti. Terima kasih.`;
                   No
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
-                  Nama Item
+                  Nama Barang
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600">
                   Kategori
@@ -324,7 +324,7 @@ Mohon segera ditindaklanjuti. Terima kasih.`;
                           )
                         }
                         className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:outline-none"
-                        placeholder="Edit nama item..."
+                        placeholder="Edit nama barang..."
                       />
                     ) : (
                       <div className="text-sm font-medium text-slate-800">

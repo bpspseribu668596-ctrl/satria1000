@@ -351,14 +351,14 @@ export default function StokOpnamePage() {
       [`NO : ${docNumber.trim() || "..................................................."}`],
       [""],
       [
-        "KODE UAKPB : 054.01.0100.539163.000.KD",
+        "KODE UAKPB : 054.01.0100.539164.000.KD",
         "",
         "",
         "",
         `Tanggal Cetak : ${printDate}`,
       ],
       [
-        `UAKPB : ${settings?.org_name || "BADAN PUSAT STATISTIK JAKARTA SELATAN"}`,
+        `UAKPB : ${settings?.org_name || "BADAN PUSAT STATISTIK KEPULAUAN SERIBU"}`,
         "",
         "",
         "",
@@ -854,11 +854,11 @@ export default function StokOpnamePage() {
         <div className="flex justify-between items-start text-[8.5pt] mb-2 leading-relaxed border-b border-black pb-1.5">
           <div>
             <div>
-              <span className="font-semibold">KODE UAKPB : </span>054.01.0100.539163.000.KD
+              <span className="font-semibold">KODE UAKPB : </span>054.01.0100.539164.000.KD
             </div>
             <div>
               <span className="font-semibold">UAKPB : </span>
-              {settings?.org_name || "BADAN PUSAT STATISTIK JAKARTA SELATAN"}
+              {settings?.org_name || "BADAN PUSAT STATISTIK KEPULAUAN SERIBU"}
             </div>
           </div>
           <div className="text-right">

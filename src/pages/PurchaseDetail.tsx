@@ -421,7 +421,7 @@ export default function PurchaseDetail() {
           />
           <div className="flex-1 text-center">
             <h1 className="text-sm font-extrabold uppercase tracking-widest text-black">
-              {settings?.org_name || "BADAN PUSAT STATISTIK KOTA JAKARTA SELATAN"}
+              {settings?.org_name || "BADAN PUSAT STATISTIK KEPULAUAN SERIBU"}
             </h1>
             <h2 className="text-base font-black uppercase tracking-wide text-black mt-0.5">
               BUKTI PENERIMAAN HASIL PENGADAAN BARANG (BAPP)

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { db, type ATKItem, type InitialBalance } from "../lib/db";
-import { Plus, Trash2, Save, Calendar, Download, Upload, FileSpreadsheet } from "lucide-react";
+import { Plus, Trash2, Save, Calendar, Download, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
 
 export default function SaldoAwal() {
@@ -10,7 +10,6 @@ export default function SaldoAwal() {
   const [atkItems, setAtkItems] = useState<ATKItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state for new item
   const [showAddForm, setShowAddForm] = useState(false);
@@ -127,59 +126,23 @@ export default function SaldoAwal() {
   };
 
   const downloadTemplate = () => {
-    const ws = XLSX.utils.aoa_to_sheet([
-      ["Nama Barang", "Satuan", "Jumlah", "Harga Satuan"],
-      ["KERTAS HVS A4 70GSM", "RIM", 50, 55000],
-      ["PEN MEREK A", "PCS", 120, 3500],
-    ]);
+    // Generate template dari item yang sudah ada di Saldo Awal tahun ini
+    const rows = balances.length > 0
+      ? balances.map(b => ({
+          "Nama Barang": b.item_name,
+          "Satuan": b.unit,
+          "Jumlah": b.quantity,
+          "Harga Satuan": b.unit_price,
+        }))
+      : [
+          { "Nama Barang": "(contoh) KERTAS HVS A4 70GSM", "Satuan": "RIM", "Jumlah": 50, "Harga Satuan": 55000 },
+          { "Nama Barang": "(contoh) PENSIL", "Satuan": "PCS", "Jumlah": 120, "Harga Satuan": 3500 },
+        ];
+
+    const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Template");
-    XLSX.writeFile(wb, `template_saldo_awal_${year}.xlsx`);
-  };
-
-  const handleExcelImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setSaving(true);
-    try {
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json<any>(sheet);
-
-      const now = new Date().toISOString();
-      const existingNames = new Set(balances.map(b => b.item_name.toLowerCase()));
-      const newItems: any[] = [];
-      
-      for (const row of data) {
-        const name = row["Nama Barang"] || row["Nama Item"];
-        if (name && !existingNames.has(String(name).toLowerCase())) {
-          newItems.push({
-            item_name: String(name),
-            unit: String(row["Satuan"] || "pcs"),
-            quantity: Number(row["Jumlah"] || 0),
-            unit_price: Number(row["Harga Satuan"] || row["Harga"] || 0),
-            year: year,
-            created_at: now,
-            updated_at: now
-          });
-        }
-      }
-
-      if (newItems.length > 0) {
-        await db.initial_balances.bulkAdd(newItems);
-        alert(`Berhasil mengimpor ${newItems.length} item saldo awal!`);
-        loadData();
-      } else {
-        alert("Tidak ada data baru yang diimpor (mungkin item sudah ada).");
-      }
-    } catch (err) {
-      alert("Gagal import: " + (err as Error).message);
-    } finally {
-      setSaving(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+    XLSX.utils.book_append_sheet(wb, ws, "Saldo Awal");
+    XLSX.writeFile(wb, `saldo_awal_${year}.xlsx`);
   };
 
   const formatCurrency = (num: number) => {
@@ -225,23 +188,12 @@ export default function SaldoAwal() {
           <div className="flex gap-2">
             <button 
               onClick={downloadTemplate}
+              title="Download data Saldo Awal tahun ini dalam format Excel"
               className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
             >
               <Download size={18} />
-              Template
+              Download Data
             </button>
-            <label className="flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-colors cursor-pointer">
-              <Upload size={18} />
-              {saving ? "Importing..." : "Import Excel"}
-              <input 
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls"
-                onChange={handleExcelImport}
-                className="hidden"
-                disabled={saving}
-              />
-            </label>
           </div>
 
           <button 

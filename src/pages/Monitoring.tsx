@@ -181,9 +181,9 @@ export default function Monitoring() {
       <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2"> Cari Item </label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2"> Cari Barang </label>
             <input type="text" value={filter} onChange={(e) => setFilter(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none" placeholder="Cari nama item..." />
+              className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none" placeholder="Cari nama barang..." />
           </div>
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2"> Filter Kode Barang </label>
@@ -203,7 +203,7 @@ export default function Monitoring() {
           <table className="w-full">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Nama ATK</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Nama Barang</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Kode Barang</th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">Satuan</th>
                 <th className="px-4 py-3 text-right text-xs font-bold text-slate-600 uppercase">Masuk</th>

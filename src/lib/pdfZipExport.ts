@@ -105,7 +105,7 @@ export function buildRequestHtml(
   kopText.style.textAlign = "center";
   kopText.innerHTML = `
     <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
-      ${settings?.org_name || "BADAN PUSAT STATISTIK KOTA JAKARTA SELATAN"}
+      ${settings?.org_name || "BADAN PUSAT STATISTIK KEPULAUAN SERIBU"}
     </div>
     <div style="font-size: 13px; font-weight: 900; text-transform: uppercase; margin-top: 2px;">
       FORMULIR PERMINTAAN ALAT TULIS KANTOR (ATK)
@@ -168,7 +168,7 @@ export function buildRequestHtml(
       <tr>
         <td style="padding: 2px 0; font-weight: 600; color: #1e293b;">Lokasi Pengajuan</td>
         <td style="padding: 2px 0; text-align: center; font-weight: bold;">:</td>
-        <td style="padding: 2px 0;" colspan="4">${req.submission_location || "Jakarta Selatan"}</td>
+        <td style="padding: 2px 0;" colspan="4">${req.submission_location || "Kepulauan Seribu"}</td>
       </tr>
     </tbody>
   `;
@@ -229,7 +229,7 @@ export function buildRequestHtml(
   locationDate.style.fontSize = "10.5px";
   locationDate.style.marginBottom = "6px";
   locationDate.style.fontWeight = "500";
-  locationDate.textContent = `${req.submission_location || "Jakarta Selatan"}, ${formatIndoDate(req.document_date || req.submission_date)}`;
+  locationDate.textContent = `${req.submission_location || "Kepulauan Seribu"}, ${formatIndoDate(req.document_date || req.submission_date)}`;
   sigSection.appendChild(locationDate);
 
   const sigGrid = document.createElement("div");
@@ -311,7 +311,7 @@ export function buildRequestHtml(
       </div>
       <div style="line-height: 1.25;">
         <div style="font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #000000;">
-          Verifikasi Keabsahan Naskah Dinas Elektronik • SATRIA BPS Kota Jakarta Selatan
+          Verifikasi Keabsahan Naskah Dinas Elektronik • SATRIA BPS Kepulauan Seribu
         </div>
         <div style="color: #475569; font-size: 7.5px;">
           Dokumen ini sah dan diterbitkan secara elektronik melalui Sistem SATRIA ATK.
@@ -326,7 +326,7 @@ export function buildRequestHtml(
     </div>
     <div style="text-align: right; font-family: monospace; font-size: 7px; color: #64748b; flex-shrink: 0;">
       <div>SISTEM SATRIA</div>
-      <div>BPS JAKARTA SELATAN</div>
+      <div>BPS KEPULAUAN SERIBU</div>
     </div>
   `;
   container.appendChild(footnote);

@@ -510,7 +510,7 @@ export default function TransferKeluarDetail() {
           />
           <div className="flex-1 text-center">
             <h1 className="text-sm font-extrabold uppercase tracking-widest text-black">
-              {settings?.org_name || "BADAN PUSAT STATISTIK KOTA JAKARTA SELATAN"}
+              {settings?.org_name || "BADAN PUSAT STATISTIK KEPULAUAN SERIBU"}
             </h1>
             <h2 className="text-base font-black uppercase tracking-wide text-black mt-0.5">
               BERITA ACARA SERAH TERIMA BARANG (BAST)
@@ -532,7 +532,7 @@ export default function TransferKeluarDetail() {
         <div className="text-xs mb-3 text-justify leading-relaxed">
           <p className="mb-2">
             Pada hari ini, tanggal <strong>{formatIndoDate(transfer.document_date || transfer.transfer_date)}</strong>,
-            bertempat di Kantor Badan Pusat Statistik Kota Jakarta Selatan, kami yang bertanda tangan di bawah ini:
+            bertempat di Kantor Badan Pusat Statistik Kepulauan Seribu, kami yang bertanda tangan di bawah ini:
           </p>
           <table className="w-full text-xs mb-3 border-collapse">
             <tbody>
@@ -553,7 +553,7 @@ export default function TransferKeluarDetail() {
                 <td className="py-0.5 font-semibold">Jabatan</td>
                 <td className="py-0.5 text-center font-bold">:</td>
                 <td className="py-0.5">
-                  {settings?.official_job || "Pejabat Pembuat Komitmen / Pengurus Barang"}, BPS Kota Jakarta Selatan
+                  {settings?.official_job || "Pejabat Pembuat Komitmen / Pengurus Barang"}, BPS Kepulauan Seribu
                 </td>
               </tr>
               <tr>
@@ -645,7 +645,7 @@ export default function TransferKeluarDetail() {
 
             <div className="text-center w-64">
               <p className="font-semibold text-slate-700">PIHAK KESATU (Yang Menyerahkan),</p>
-              <p className="font-bold text-black uppercase mt-0.5">BPS KOTA JAKARTA SELATAN</p>
+              <p className="font-bold text-black uppercase mt-0.5">BPS KEPULAUAN SERIBU</p>
               <div className="h-20"></div>
               <p className="font-bold border-b border-black inline-block min-w-[180px] pb-0.5">
                 {settings?.official_name || "( .................................................. )"}

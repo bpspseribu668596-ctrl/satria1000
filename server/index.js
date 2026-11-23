@@ -251,7 +251,7 @@ async function initializeDatabase() {
     if (rows[0].count === 0) {
       await pool.query(
         "INSERT INTO users (nip, username, name, password_hash, role, work_unit) VALUES (?, ?, ?, ?, ?, ?)",
-        ["123456", "admin", "Administrator", "admin123", '["admin", "operator", "verifikator"]', "BPS JAKARTA SELATAN"]
+        ["123456", "admin", "Administrator", "admin123", '["admin", "operator", "verifikator"]', "BPS KEPULAUAN SERIBU"]
       );
       console.log("Default admin account seeded.");
     }

@@ -232,6 +232,8 @@ export default function EditRequest() {
         submission_location: location,
         fungsi_bagian: fungsiBagian || null,
         requester_notes: `${requesterName}${requesterNIP ? " (" + requesterNIP + ")" : ""}`,
+        status: "pending_verification",  // kembalikan ke antrian verifikasi
+        rejection_reason: null,          // hapus catatan revisi lama
         updated_at: new Date().toISOString(),
       });
 

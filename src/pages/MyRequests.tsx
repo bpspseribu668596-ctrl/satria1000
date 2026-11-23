@@ -1,12 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { db, type Request } from "../lib/db";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, AlertCircle } from "lucide-react";
 
 export default function MyRequests() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,12 +90,16 @@ export default function MyRequests() {
         ) : (
           <div className="divide-y divide-slate-100">
             {requests.map((req) => (
-              <Link
+              <div
                 key={req.id}
-                to={`/app/request/${req.id}`}
-                className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-colors"
+                onClick={() =>
+                  req.status === "revision_requested"
+                    ? navigate(`/app/edit-request/${req.id}`)
+                    : navigate(`/app/request/${req.id}`)
+                }
+                className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-colors cursor-pointer"
               >
-                <div>
+                <div className="flex-1 min-w-0">
                   <div className="font-semibold text-slate-800">
                     {req.document_number}
                   </div>
@@ -103,9 +108,17 @@ export default function MyRequests() {
                     <span className="text-purple-700 font-medium">Buku: {new Date(req.book_date || req.submission_date).toLocaleDateString("id-ID")}</span> •{" "}
                     <span>Dok: {new Date(req.document_date || req.submission_date).toLocaleDateString("id-ID")}</span>
                   </div>
+                  {req.status === "revision_requested" && req.rejection_reason && (
+                    <div className="flex items-start gap-1.5 mt-1 text-xs text-orange-600 font-medium">
+                      <AlertCircle size={13} className="shrink-0 mt-0.5" />
+                      <span>Catatan: {req.rejection_reason}</span>
+                    </div>
+                  )}
                 </div>
-                {statusBadge(req.status)}
-              </Link>
+                <div className="ml-4 shrink-0">
+                  {statusBadge(req.status)}
+                </div>
+              </div>
             ))}
           </div>
         )}

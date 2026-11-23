@@ -114,7 +114,7 @@ export default function Landing() {
                 Sistem ATK Terintegrasi & Akurat
               </p>
               <p className="text-xs sm:text-sm lg:text-base font-semibold text-slate-500 tracking-[0.2em] uppercase mt-1">
-                Badan Pusat Statistik Kota Jakarta Selatan
+                Badan Pusat Statistik Kepulauan Seribu
               </p>
             </div>
 
@@ -491,7 +491,7 @@ export default function Landing() {
                 className="h-8 w-8"
               />
               <span className="text-slate-500 text-sm">
-                © 2025 SATRIA - BPS Jakarta Selatan
+                © 2025 SATRIA - BPS Kepulauan Seribu
               </span>
             </div>
             <div className="flex gap-6 text-sm text-slate-500">

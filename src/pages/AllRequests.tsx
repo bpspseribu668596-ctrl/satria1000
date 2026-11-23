@@ -382,8 +382,8 @@ export default function AllRequests() {
       ["UNTUK PERIODE TAHUN 2026"],
       ["REGISTER TRANSAKSI HARIAN"],
       ["PERSEDIAAN KELUAR (HABIS PAKAI)"],
-      ["KODE UAKPB : 054.01.0100.539163.000.KD"],
-      ["UAKPB : BADAN PUSAT STATISTIK JAKARTA SELATAN"],
+      ["KODE UAKPB : 054.01.0100.539164.000.KD"],
+      ["UAKPB : BADAN PUSAT STATISTIK KEPULAUAN SERIBU"],
       [`Tanggal : ${todayFormatted}`],
       [""],
       [
@@ -2279,10 +2279,10 @@ export default function AllRequests() {
               </div>
               <div className="text-right">
                 <p>
-                  <span className="font-semibold">KODE UAKPB : </span>054.01.0100.539163.000.KD
+                  <span className="font-semibold">KODE UAKPB : </span>054.01.0100.539164.000.KD
                 </p>
                 <p>
-                  <span className="font-semibold">UAKPB : </span>BADAN PUSAT STATISTIK JAKARTA SELATAN
+                  <span className="font-semibold">UAKPB : </span>BADAN PUSAT STATISTIK KEPULAUAN SERIBU
                 </p>
                 <p className="text-slate-500 mt-0.5">
                   Tanggal Cetak : {formatSaktiDate(new Date().toISOString().split("T")[0])}

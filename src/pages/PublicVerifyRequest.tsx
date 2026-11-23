@@ -79,7 +79,7 @@ export default function PublicVerifyRequest() {
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center border border-slate-200">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <h2 className="text-lg font-bold text-slate-800">Memverifikasi Dokumen...</h2>
-          <p className="text-xs text-slate-500 mt-1">Menghubungkan ke basis data SATRIA BPS Kota Jakarta Selatan</p>
+          <p className="text-xs text-slate-500 mt-1">Menghubungkan ke basis data SATRIA BPS Kepulauan Seribu</p>
         </div>
       </div>
     );
@@ -120,7 +120,7 @@ export default function PublicVerifyRequest() {
             )}
             <div>
               <h1 className="font-extrabold text-sm uppercase tracking-wide text-slate-900">
-                {settings?.org_name || "BPS Kota Jakarta Selatan"}
+                {settings?.org_name || "BPS Kepulauan Seribu"}
               </h1>
               <p className="text-xs text-blue-600 font-semibold">
                 Sistem Informasi Pengelolaan ATK (SATRIA)
@@ -192,7 +192,7 @@ export default function PublicVerifyRequest() {
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block text-[11px]">Lokasi</span>
-                  <span className="font-bold text-slate-800">{request.submission_location || "Jakarta Selatan"}</span>
+                  <span className="font-bold text-slate-800">{request.submission_location || "Kepulauan Seribu"}</span>
                 </div>
               </div>
             </div>

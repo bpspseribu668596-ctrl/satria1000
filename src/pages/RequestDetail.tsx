@@ -99,7 +99,7 @@ export default function RequestDetail() {
       setEditFungsiBagian(req.fungsi_bagian || reqUser?.work_unit || "");
       setEditDocumentDate(req.document_date || req.submission_date || new Date().toISOString().split("T")[0]);
       setEditBookDate(req.book_date || req.submission_date || new Date().toISOString().split("T")[0]);
-      setEditLocation(req.submission_location || "Jakarta Selatan");
+      setEditLocation(req.submission_location || "Kepulauan Seribu");
       setEditRequesterSignature(req.requester_signature || null);
 
       // Parse document_number e.g. "0013/ATK/5/2026"
@@ -683,7 +683,7 @@ export default function RequestDetail() {
           />
           <div className="flex-1 text-center">
             <h1 className="text-xs font-extrabold uppercase tracking-widest text-black">
-              {settings?.org_name || "BADAN PUSAT STATISTIK KOTA JAKARTA SELATAN"}
+              {settings?.org_name || "BADAN PUSAT STATISTIK KEPULAUAN SERIBU"}
             </h1>
             <h2 className="text-sm font-black uppercase tracking-wide text-black mt-0.5">
               FORMULIR PERMINTAAN ALAT TULIS KANTOR (ATK)
@@ -743,7 +743,7 @@ export default function RequestDetail() {
               <td className="py-0.5 font-semibold text-slate-800">Lokasi Pengajuan</td>
               <td className="py-0.5 text-center font-bold">:</td>
               <td className="py-0.5 text-black" colSpan={4}>
-                {editLocation || request.submission_location || "Jakarta Selatan"}
+                {editLocation || request.submission_location || "Kepulauan Seribu"}
               </td>
             </tr>
           </tbody>
@@ -787,7 +787,7 @@ export default function RequestDetail() {
         {/* BLOK TANDA TANGAN 3 KOLOM RESMI NASKAH DINAS */}
         <div className="mt-3">
           <div className="text-right text-[11px] mb-1.5 font-medium text-slate-900">
-            {editLocation || request.submission_location || "Jakarta Selatan"},{" "}
+            {editLocation || request.submission_location || "Kepulauan Seribu"},{" "}
             {formatIndoDate(editDocumentDate || request.document_date || request.submission_date)}
           </div>
 
@@ -889,7 +889,7 @@ export default function RequestDetail() {
               </div>
               <div className="space-y-0.5 leading-tight">
                 <div className="font-bold uppercase tracking-wider text-black text-[8px]">
-                  Verifikasi Keabsahan Naskah Dinas Elektronik &bull; SATRIA BPS Kota Jakarta Selatan
+                  Verifikasi Keabsahan Naskah Dinas Elektronik &bull; SATRIA BPS Kepulauan Seribu
                 </div>
                 <div className="text-slate-700 text-[7.5px]">
                   Dokumen ini sah dan diterbitkan secara elektronik melalui Sistem SATRIA ATK.
@@ -904,7 +904,7 @@ export default function RequestDetail() {
             </div>
             <div className="text-right font-mono text-[7px] text-slate-500 shrink-0">
               <div>SISTEM SATRIA</div>
-              <div>BPS JAKARTA SELATAN</div>
+              <div>BPS KEPULAUAN SERIBU</div>
             </div>
           </div>
         </div>
@@ -929,7 +929,7 @@ export default function RequestDetail() {
                 FORMULIR PERMINTAAN ATK
               </h2>
               <p className="text-blue-100 print:text-slate-600">
-                {settings?.org_name || "BPS Kota Jakarta Selatan"}
+                {settings?.org_name || "BPS Kepulauan Seribu"}
               </p>
               <p className="text-sm text-blue-200 print:text-slate-500 print:text-xs">
                 Tahun Anggaran{" "}
@@ -2019,7 +2019,7 @@ export default function RequestDetail() {
                           <div className="flex-1 min-w-0">
                             <div className="font-bold text-slate-900 text-sm truncate">{matched.name}</div>
                             <div className="text-xs text-slate-500 font-mono">{matched.nip || "Tanpa NIP"}</div>
-                            <div className="text-[11px] text-slate-400 truncate">{matched.workUnit || "BPS Jakarta Selatan"}</div>
+                            <div className="text-[11px] text-slate-400 truncate">{matched.workUnit || "BPS Kepulauan Seribu"}</div>
                           </div>
                           <button
                             type="button"
@@ -2073,7 +2073,7 @@ export default function RequestDetail() {
                             <div className="min-w-0">
                               <div className="font-bold text-slate-800 text-xs truncate group-hover:text-blue-700">{sig.name}</div>
                               <div className="text-[11px] text-slate-500 font-mono">{sig.nip || "-"}</div>
-                              <div className="text-[10px] text-slate-400 truncate">{sig.workUnit || "BPS Jakarta Selatan"}</div>
+                              <div className="text-[10px] text-slate-400 truncate">{sig.workUnit || "BPS Kepulauan Seribu"}</div>
                             </div>
                           </div>
                           <button

@@ -36,7 +36,7 @@ export default function SettingsPage() {
     if (!data) {
       data = {
         id: 1,
-        org_name: "BPS Kota Jakarta Selatan",
+        org_name: "BPS Kepulauan Seribu",
         logo_url: "",
         budget_year: new Date().getFullYear().toString(),
         doc_format: "{AUTO}/ATK/{MM}/{YYYY}",

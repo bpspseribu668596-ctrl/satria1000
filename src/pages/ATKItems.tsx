@@ -96,7 +96,7 @@ export default function ATKItems() {
   // Download Excel template
   const downloadTemplate = () => {
     const ws = XLSX.utils.aoa_to_sheet([
-      ["Kode Barang", "Nama Item", "Satuan"],
+      ["Kode Barang", "Nama Barang", "Satuan"],
       ["1.01.03.02.001.000321", "KERTAS HVS A4 70GSM", "RIM"],
       ["1.01.03.01.001.000226", "MAP BPS JAKSEL", "PAK"],
     ]);
@@ -118,16 +118,16 @@ export default function ATKItems() {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json<{
         "Kode Barang": string;
-        "Nama Item": string;
+        "Nama Barang": string;
         Satuan: string;
       }>(sheet);
 
       let imported = 0;
       for (const row of data) {
-        if (row["Kode Barang"] && row["Nama Item"]) {
+        if (row["Kode Barang"] && row["Nama Barang"]) {
           await db.atk_items.add({
             item_code: String(row["Kode Barang"]),
-            name: row["Nama Item"],
+            name: row["Nama Barang"],
             unit: row["Satuan"] || "pcs",
             created_at: new Date().toISOString(),
           });
@@ -222,7 +222,7 @@ export default function ATKItems() {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Cari berdasarkan kode barang, nama item, atau satuan..."
+            placeholder="Cari berdasarkan kode barang, nama barang, atau satuan..."
             className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none"
           />
         </div>
@@ -241,7 +241,7 @@ export default function ATKItems() {
                 Kode Barang
               </th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase">
-                Nama Item
+                Nama Barang
               </th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase">
                 Satuan
@@ -337,7 +337,7 @@ export default function ATKItems() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  Nama Item <span className="text-red-500">*</span>
+                  Nama Barang <span className="text-red-500">*</span>
                 </label>
                 <input 
                   type="text"

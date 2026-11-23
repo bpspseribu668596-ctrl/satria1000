@@ -21,118 +21,188 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   FileSpreadsheet,
+  Inbox,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const navItems = [
-  // SECTION: FRONT OFFICE / TRANSAKSI
+// --- Tipe data nav ---
+type NavItem =
+  | {
+      type: "section";
+      label: string;
+      roles: string[];
+    }
+  | {
+      type: "link";
+      to: string;
+      icon: React.ElementType;
+      label: string;
+      roles: string[];
+    };
+
+const navItems: NavItem[] = [
+  // 1. BERANDA
   {
+    type: "section",
+    label: "Beranda",
+    roles: ["pegawai", "verifikator", "operator", "penanggungjawab", "admin"],
+  },
+  {
+    type: "link",
     to: "/app",
     icon: LayoutDashboard,
     label: "Dashboard",
     roles: ["pegawai", "verifikator", "operator", "penanggungjawab", "admin"],
   },
+
+  // 2. PERMINTAAN ATK
   {
+    type: "section",
+    label: "Permintaan ATK",
+    roles: ["pegawai", "verifikator", "operator", "penanggungjawab", "admin"],
+  },
+  {
+    type: "link",
     to: "/app/new-request",
     icon: FilePlus,
     label: "Permintaan ATK",
     roles: ["pegawai", "operator", "verifikator", "penanggungjawab", "admin"],
   },
   {
+    type: "link",
     to: "/app/atk-requests",
     icon: PlusCircle,
     label: "Permohonan Pengadaan ATK",
     roles: ["pegawai", "operator", "verifikator", "penanggungjawab", "admin"],
   },
   {
+    type: "link",
     to: "/app/my-requests",
-    icon: FileText,
+    icon: Inbox,
     label: "Permintaan Saya",
     roles: ["pegawai"],
   },
   {
+    type: "link",
     to: "/app/all-requests",
     icon: FileText,
     label: "Semua Permintaan",
     roles: ["pegawai", "verifikator", "operator", "penanggungjawab", "admin"],
   },
+
+  // 3. VERIFIKASI & PERSETUJUAN
   {
+    type: "section",
+    label: "Verifikasi & Persetujuan",
+    roles: ["verifikator", "penanggungjawab", "admin"],
+  },
+  {
+    type: "link",
     to: "/app/verification",
     icon: ListChecks,
     label: "Verifikasi",
     roles: ["verifikator", "admin"],
   },
   {
+    type: "link",
     to: "/app/approval",
     icon: ShieldCheck,
     label: "Persetujuan",
     roles: ["penanggungjawab", "admin"],
   },
 
-  // SECTION: GUDANG / INVENTORI
-  { divider: true, roles: ["admin", "operator", "penanggungjawab"] },
+  // 4. PENGELOLAAN PERSEDIAAN
   {
+    type: "section",
+    label: "Pengelolaan Persediaan",
+    roles: ["admin", "operator", "penanggungjawab"],
+  },
+  {
+    type: "link",
     to: "/app/atk-items",
     icon: Package,
     label: "Master ATK",
     roles: ["admin", "operator", "penanggungjawab"],
   },
   {
+    type: "link",
     to: "/app/initial-balance",
     icon: CircleDollarSign,
     label: "Saldo Awal",
     roles: ["admin", "operator", "penanggungjawab"],
   },
   {
+    type: "link",
     to: "/app/purchases",
     icon: ShoppingCart,
     label: "Pembelian",
     roles: ["admin", "operator", "penanggungjawab"],
   },
   {
+    type: "link",
     to: "/app/transfer-masuk",
     icon: ArrowDownLeft,
     label: "Transfer Masuk",
     roles: ["admin", "operator", "penanggungjawab"],
   },
   {
+    type: "link",
     to: "/app/transfer-keluar",
     icon: ArrowUpRight,
     label: "Transfer Keluar",
     roles: ["admin", "operator", "penanggungjawab"],
   },
   {
+    type: "link",
     to: "/app/stock-opname",
     icon: ClipboardCheck,
     label: "Stok Opname",
     roles: ["admin", "operator", "penanggungjawab"],
   },
 
-  // SECTION: LAPORAN
-  { divider: true, roles: ["admin", "operator", "penanggungjawab"] },
+  // 5. MONITORING & LAPORAN
   {
+    type: "section",
+    label: "Monitoring & Laporan",
+    roles: ["admin", "operator", "penanggungjawab", "verifikator"],
+  },
+  {
+    type: "link",
     to: "/app/monitoring",
     icon: BarChart3,
     label: "Monitoring Stok",
     roles: ["admin", "operator", "penanggungjawab"],
   },
   {
+    type: "link",
     to: "/app/stock-card",
     icon: ClipboardList,
     label: "Kartu Kendali",
     roles: ["admin", "operator", "penanggungjawab"],
   },
   {
+    type: "link",
     to: "/app/inventory-report",
     icon: FileSpreadsheet,
     label: "Laporan Persediaan",
     roles: ["admin", "operator", "penanggungjawab", "verifikator"],
   },
 
-  // SECTION: SYSTEM
-  { divider: true, roles: ["admin"] },
-  { to: "/app/users", icon: UsersIcon, label: "Kelola User", roles: ["admin"] },
+  // 6. ADMINISTRASI
   {
+    type: "section",
+    label: "Administrasi",
+    roles: ["admin", "pegawai", "verifikator", "operator", "penanggungjawab"],
+  },
+  {
+    type: "link",
+    to: "/app/users",
+    icon: UsersIcon,
+    label: "Kelola User",
+    roles: ["admin"],
+  },
+  {
+    type: "link",
     to: "/app/settings",
     icon: Settings,
     label: "Pengaturan",
@@ -202,7 +272,7 @@ export default function Layout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-hide">
+        <nav className="flex-1 p-3 overflow-y-auto scrollbar-hide">
           {navItems.map((item, i) => {
             const currentRoles = (user?.role || []) as string[];
             const hasAccess = (item.roles as string[]).some((r) =>
@@ -210,27 +280,46 @@ export default function Layout() {
             );
             if (!hasAccess) return null;
 
-            if ("divider" in item && item.divider) {
-              return <div key={i} className="h-px bg-white/10 my-3" />;
+            // Section label
+            if (item.type === "section") {
+              return (
+                <div
+                  key={i}
+                  className="px-3 pt-5 pb-1.5 text-[10px] font-bold tracking-widest uppercase text-slate-500 select-none"
+                >
+                  {item.label}
+                </div>
+              );
             }
 
-            const Icon = item.icon!;
+            // Nav link
+            const Icon = item.icon;
             return (
               <NavLink
                 key={item.to}
-                to={item.to!}
+                to={item.to}
                 end={item.to === "/app"}
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     isActive
-                      ? "bg-blue-600 text-white"
-                      : "text-slate-400 hover:bg-white/10 hover:text-white"
+                      ? "bg-blue-600/20 text-blue-400 font-semibold"
+                      : "text-slate-400 hover:bg-white/8 hover:text-slate-200"
                   }`
                 }
               >
-                <Icon size={20} />
-                {item.label}
+                {({ isActive }) => (
+                  <>
+                    <Icon
+                      size={18}
+                      className={isActive ? "text-blue-400" : "text-slate-500"}
+                    />
+                    <span className="truncate">{item.label}</span>
+                    {isActive && (
+                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                    )}
+                  </>
+                )}
               </NavLink>
             );
           })}
