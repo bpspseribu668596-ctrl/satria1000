@@ -27,11 +27,9 @@ export default function Monitoring() {
       const masterItems = await db.atk_items.toArray();
       const currentYear = new Date().getFullYear();
       
-      const [initialBalances, purchaseItems, approvedRequests, rItemsAtk, approvedRequestsNew, transferMasukItems, transferKeluarItems] = await Promise.all([
+      const [initialBalances, purchaseItems, approvedRequestsNew, transferMasukItems, transferKeluarItems] = await Promise.all([
         db.initial_balances.where("year").equals(currentYear).toArray(),
         db.purchase_items.toArray(),
-        db.atk_requests.where("status").equals("approved").toArray(),
-        db.atk_request_items.toArray(),
         db.requests.where("status").equals("approved").toArray(),
         db.transfer_masuk_items.toArray(),
         db.transfer_keluar_items.toArray()
@@ -71,16 +69,6 @@ export default function Monitoring() {
       for (const t of transferMasukItems) {
         const item = getOrCreate(t.item_name, t.unit);
         item.stock_in += Number(t.quantity) || 0;
-      }
-
-      // Process ATK Requests
-      const approvedIds = new Set(approvedRequests.map((r: any) => r.id));
-      for (const ri of rItemsAtk) {
-        if (approvedIds.has(ri.request_id)) {
-          const name = ri.final_item_name || ri.item_name;
-          const item = getOrCreate(name, ri.unit, ri.category, ri.atk_item_id);
-          item.stock_out += Number(ri.quantity) || 0;
-        }
       }
 
       // Process New Workflow Requests

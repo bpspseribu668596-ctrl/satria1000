@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { db, type PurchaseItem, type ATKItem } from "../lib/db";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import * as XLSX from "xlsx";
 import {
   Upload,
@@ -21,6 +23,7 @@ type ItemRow = Omit<PurchaseItem, "id" | "purchase_id">;
 export default function NewPurchase() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { dialogState, closeDialog, alert } = useDialog();
 
   // Header form
   const [documentNumber, setDocumentNumber] = useState("");
@@ -58,9 +61,9 @@ export default function NewPurchase() {
     setItems([...items, { item_name: "", quantity: 1, unit: "pcs", unit_price: 0, total: 0 }]);
   };
 
-  const removeRow = (index: number) => {
+  const removeRow = async (index: number) => {
     if (items.length === 1) {
-      alert("Minimal harus ada 1 barang");
+      await alert("Minimal harus ada 1 barang");
       return;
     }
     setItems(items.filter((_, i) => i !== index));
@@ -102,7 +105,7 @@ export default function NewPurchase() {
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
 
       if (jsonData.length < 2) {
-        alert("File Excel kosong atau tidak sesuai template");
+        await alert("File Excel kosong atau tidak sesuai template");
         return;
       }
 
@@ -148,9 +151,9 @@ export default function NewPurchase() {
       if (importedItems.length > 0) lines.push(`✅ ${importedItems.length} barang berhasil diimpor.`);
       if (skippedItems.length > 0) lines.push(`⚠️ ${skippedItems.length} barang dilewati karena tidak ada di Master ATK:\n  - ${skippedItems.join("\n  - ")}`);
       if (importedItems.length === 0 && skippedItems.length === 0) lines.push("Tidak ada data valid yang ditemukan di file Excel.");
-      alert(lines.join("\n\n"));
+      await alert(lines.join("\n\n"));
     } catch (err) {
-      alert("Gagal membaca file Excel: " + (err as Error).message);
+      await alert("Gagal membaca file Excel: " + (err as Error).message);
     } finally {
       if (excelInputRef.current) excelInputRef.current.value = "";
     }
@@ -170,12 +173,12 @@ export default function NewPurchase() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!documentNumber.trim()) return alert("Nomor nota harus diisi");
-    if (!vendorName.trim()) return alert("Nama toko/vendor harus diisi");
+    if (!documentNumber.trim()) { await alert("Nomor nota harus diisi"); return; }
+    if (!vendorName.trim()) { await alert("Nama toko/vendor harus diisi"); return; }
 
     const validItems = items.filter((item) => item.item_name.trim() && item.quantity > 0);
     if (validItems.length === 0) {
-      alert("Minimal harus ada 1 barang yang valid");
+      await alert("Minimal harus ada 1 barang yang valid");
       return;
     }
 
@@ -219,10 +222,10 @@ export default function NewPurchase() {
         });
       }
 
-      alert("Pembelian berhasil disimpan!");
+      await alert("Pembelian berhasil disimpan!");
       navigate("/app/purchases");
     } catch (err) {
-      alert("Gagal menyimpan: " + (err as Error).message);
+      await alert("Gagal menyimpan: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -239,6 +242,7 @@ export default function NewPurchase() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex items-center gap-4 mb-2">
         <button onClick={() => navigate("/app/purchases")} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
           <ArrowLeft size={24} />

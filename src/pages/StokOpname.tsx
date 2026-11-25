@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { db, type StockOpname, type Settings } from "../lib/db";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import { Save, Calendar, ClipboardCheck, History, Printer, FileSpreadsheet, X } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -17,6 +19,7 @@ interface StockItem {
 
 export default function StokOpnamePage() {
   const { user } = useAuth();
+  const { dialogState, closeDialog, alert } = useDialog();
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [stockItems, setStockItems] = useState<StockItem[]>([]);
@@ -266,10 +269,10 @@ export default function StokOpnamePage() {
         });
       }
 
-      alert("Stok opname berhasil disimpan!");
+      await alert("Stok opname berhasil disimpan!");
       loadData();
     } catch (err) {
-      alert("Gagal menyimpan: " + (err as Error).message);
+      await alert("Gagal menyimpan: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -303,10 +306,10 @@ export default function StokOpnamePage() {
     return list;
   };
 
-  const handlePrintPDF = () => {
+  const handlePrintPDF = async () => {
     const list = getFilteredBahanOpnameItems();
     if (list.length === 0) {
-      alert("Tidak ada barang yang sesuai filter untuk dicetak.");
+      await alert("Tidak ada barang yang sesuai filter untuk dicetak.");
       return;
     }
     setIsPrinting(true);
@@ -316,10 +319,10 @@ export default function StokOpnamePage() {
     }, 400);
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const list = getFilteredBahanOpnameItems();
     if (list.length === 0) {
-      alert("Tidak ada barang yang sesuai filter untuk diekspor.");
+      await alert("Tidak ada barang yang sesuai filter untuk diekspor.");
       return;
     }
 
@@ -417,6 +420,7 @@ export default function StokOpnamePage() {
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="print:hidden">
         <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Stok Opname</h1>

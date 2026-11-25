@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { db, type Settings } from "../lib/db";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import {
   Save,
   Download,
@@ -15,6 +17,7 @@ import {
 
 export default function SettingsPage() {
   const { user } = useAuth();
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,9 +66,9 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await db.settings.update(1, settings);
-      alert("Pengaturan disimpan!");
+      await alert("Pengaturan disimpan!");
     } catch (err) {
-      alert("Gagal: " + (err as Error).message);
+      await alert("Gagal: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -76,12 +79,12 @@ export default function SettingsPage() {
     if (!user) return;
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      alert("Konfirmasi password baru tidak cocok");
+      await alert("Konfirmasi password baru tidak cocok");
       return;
     }
 
     if (passwordForm.newPassword.length < 4) {
-      alert("Password baru minimal 4 karakter");
+      await alert("Password baru minimal 4 karakter");
       return;
     }
 
@@ -103,14 +106,14 @@ export default function SettingsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal mengubah password");
 
-      alert("Password berhasil diubah!");
+      await alert("Password berhasil diubah!");
       setPasswordForm({
         oldPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
     } catch (err) {
-      alert("Gagal: " + (err as Error).message);
+      await alert("Gagal: " + (err as Error).message);
     } finally {
       setChangingPass(false);
     }
@@ -134,7 +137,7 @@ export default function SettingsPage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert("Gagal ekspor: " + (err as Error).message);
+      await alert("Gagal ekspor: " + (err as Error).message);
     }
   };
 
@@ -142,8 +145,8 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!confirm("Impor data akan menggantikan data yang ada. Lanjutkan?"))
-      return;
+    const ok = await confirm("Impor data akan menggantikan data yang ada. Lanjutkan?");
+    if (!ok) return;
 
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -160,31 +163,27 @@ export default function SettingsPage() {
           }
         });
 
-        alert("Data berhasil diimpor! Halaman akan dimuat ulang.");
+        await alert("Data berhasil diimpor! Halaman akan dimuat ulang.");
         window.location.reload();
       } catch (err) {
-        alert("Gagal impor: " + (err as Error).message);
+        await alert("Gagal impor: " + (err as Error).message);
       }
     };
     reader.readAsText(file);
   };
 
   const handleReset = async () => {
-    if (!confirm("PERINGATAN: Seluruh data akan dihapus permanen! Lanjutkan?"))
-      return;
-    if (
-      !confirm(
-        "Apakah Anda benar-benar yakin? Tindakan ini tidak bisa dibatalkan.",
-      )
-    )
-      return;
+    const ok1 = await confirm("PERINGATAN: Seluruh data akan dihapus permanen! Lanjutkan?", { destructive: true, confirmLabel: "Lanjutkan" });
+    if (!ok1) return;
+    const ok2 = await confirm("Apakah Anda benar-benar yakin? Tindakan ini tidak bisa dibatalkan.", { destructive: true, confirmLabel: "Ya, Hapus Semua" });
+    if (!ok2) return;
 
     try {
       await db.delete();
-      alert("Database telah direset. Halaman akan dimuat ulang.");
+      await alert("Database telah direset. Halaman akan dimuat ulang.");
       window.location.reload();
     } catch (err) {
-      alert("Gagal reset: " + (err as Error).message);
+      await alert("Gagal reset: " + (err as Error).message);
     }
   };
 
@@ -198,6 +197,7 @@ export default function SettingsPage() {
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <h1 className="text-2xl font-bold text-slate-800 mb-6">Pengaturan</h1>
 
       <div className="space-y-6">

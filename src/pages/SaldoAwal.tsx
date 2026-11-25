@@ -3,8 +3,12 @@ import { useState, useEffect } from "react";
 import { db, type ATKItem, type InitialBalance } from "../lib/db";
 import { Plus, Trash2, Save, Calendar, Download, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
+import { UNIT_OPTIONS } from "../lib/units";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 
 export default function SaldoAwal() {
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [year, setYear] = useState(new Date().getFullYear());
   const [balances, setBalances] = useState<InitialBalance[]>([]);
   const [atkItems, setAtkItems] = useState<ATKItem[]>([]);
@@ -43,7 +47,7 @@ export default function SaldoAwal() {
 
   const handleAddItem = async () => {
     if (!newItem.item_name.trim()) {
-      alert("Nama barang harus diisi");
+      await alert("Nama barang harus diisi");
       return;
     }
 
@@ -51,7 +55,7 @@ export default function SaldoAwal() {
       (b) => b.item_name.toLowerCase() === newItem.item_name.toLowerCase(),
     );
     if (existing) {
-      alert("Item sudah ada di saldo awal tahun ini");
+      await alert("Item sudah ada di saldo awal tahun ini");
       return;
     }
 
@@ -85,13 +89,15 @@ export default function SaldoAwal() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Yakin ingin menghapus item ini?")) return;
+    const ok = await confirm("Yakin ingin menghapus item ini?", { destructive: true, confirmLabel: "Ya, Hapus" });
+    if (!ok) return;
     await db.initial_balances.delete(id);
     loadData();
   };
 
   const handleImportFromMaster = async () => {
-    if (!confirm(`Import semua (${atkItems.length}) item dari Master ATK ke Saldo Awal Tahun ${year}?`)) return;
+    const ok = await confirm(`Import semua (${atkItems.length}) item dari Master ATK ke Saldo Awal Tahun ${year}?`);
+    if (!ok) return;
 
     setSaving(true);
     try {
@@ -112,14 +118,14 @@ export default function SaldoAwal() {
 
       if (newBalances.length > 0) {
         await db.initial_balances.bulkAdd(newBalances);
-        alert(`Berhasil menambahkan ${newBalances.length} item baru ke Saldo Awal.`);
+        await alert(`Berhasil menambahkan ${newBalances.length} item baru ke Saldo Awal.`);
       } else {
-        alert("Semua item Master sudah terdaftar di Saldo Awal tahun ini.");
+        await alert("Semua item Master sudah terdaftar di Saldo Awal tahun ini.");
       }
       
       loadData();
     } catch (err) {
-      alert("Gagal import: " + (err as Error).message);
+      await alert("Gagal import: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -167,6 +173,7 @@ export default function SaldoAwal() {
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-slate-800">
           Saldo Awal Persediaan
@@ -310,8 +317,16 @@ export default function SaldoAwal() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1"> Satuan </label>
-                  <input type="text" value={newItem.unit} onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none" placeholder="pcs..." />
+                  <select
+                    value={newItem.unit}
+                    onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="">-- Pilih Satuan --</option>
+                    {UNIT_OPTIONS.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1"> Jumlah </label>

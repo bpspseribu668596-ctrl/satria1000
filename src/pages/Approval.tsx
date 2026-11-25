@@ -5,6 +5,8 @@ import { db, type Request, type User } from "../lib/db";
 import { useAuth } from "../context/AuthContext";
 import { compressSignatureToDataUrl } from "../lib/signatureUtils";
 import SignatureCanvas from "react-signature-canvas";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import {
   ShieldCheck,
   CheckSquare,
@@ -24,6 +26,7 @@ import {
 
 export default function Approval() {
   const { user } = useAuth();
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [requests, setRequests] = useState<Request[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,14 +116,14 @@ export default function Approval() {
       setUploadedSig(compressed);
     } catch (err) {
       console.error("Gagal membaca file tanda tangan:", err);
-      alert("Gagal membaca file tanda tangan. Pastikan format gambar valid (PNG/JPG).");
+      await alert("Gagal membaca file tanda tangan. Pastikan format gambar valid (PNG/JPG).");
     }
   };
 
   // Execute batch approval
   const handleExecuteBatchApprove = async () => {
     if (!approverName.trim()) {
-      alert("Mohon masukkan nama penanggung jawab");
+      await alert("Mohon masukkan nama penanggung jawab");
       return;
     }
 
@@ -138,7 +141,8 @@ export default function Approval() {
     if (targetList.length === 0) return;
 
     const confirmMsg = `Setujui dan tanda tangani ${targetList.length} dokumen permintaan sekaligus? Dokumen akan berstatus Disetujui (Approved).`;
-    if (!window.confirm(confirmMsg)) return;
+    const ok = await confirm(confirmMsg, { confirmLabel: "Ya, Setujui" });
+    if (!ok) return;
 
     setIsProcessing(true);
     setProgress({ current: 0, total: targetList.length, currentDoc: "" });
@@ -176,7 +180,7 @@ export default function Approval() {
     setIsProcessing(false);
     setShowBatchModal(false);
     setSelectedIds(new Set());
-    alert(`Berhasil menyetujui ${successCount} dari ${targetList.length} dokumen!`);
+    await alert(`Berhasil menyetujui ${successCount} dari ${targetList.length} dokumen!`);
     await loadData();
   };
 
@@ -193,6 +197,7 @@ export default function Approval() {
 
   return (
     <div className="space-y-6 pb-20">
+      <Dialog state={dialogState} onClose={closeDialog} />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

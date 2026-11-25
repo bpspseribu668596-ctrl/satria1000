@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import SignatureCanvas from "react-signature-canvas";
 import { db, type Request, type User, type Settings, type RequestItem, type ATKItem } from "../lib/db";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
+import { WORK_UNIT_OPTIONS } from "../lib/workUnits";
 import {
   ArrowLeft,
   CheckCircle,
@@ -27,6 +30,7 @@ export default function RequestDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { dialogState, closeDialog, alert, confirm: confirmDialog, prompt } = useDialog();
   const verifierSigRef = useRef<SignatureCanvas>(null);
   const supervisorSigRef = useRef<SignatureCanvas>(null);
   const requesterSigRef = useRef<SignatureCanvas>(null);
@@ -323,9 +327,9 @@ export default function RequestDetail() {
     setEditedItems([...editedItems, { name: "", quantity: 1, unit: "pcs" }]);
   };
 
-  const removeItem = (index: number) => {
+  const removeItem = async (index: number) => {
     if (editedItems.length <= 1) {
-      alert("Minimal harus ada 1 item");
+      await alert("Minimal harus ada 1 item");
       return;
     }
     setEditedItems(editedItems.filter((_, i) => i !== index));
@@ -366,9 +370,9 @@ export default function RequestDetail() {
   };
 
   // WhatsApp reminder
-  const sendWhatsAppReminder = () => {
+  const sendWhatsAppReminder = async () => {
     if (!settings?.whatsapp_number) {
-      alert("Nomor WhatsApp belum diatur di Pengaturan");
+      await alert("Nomor WhatsApp belum diatur di Pengaturan");
       return;
     }
     const requester = users.find((u) => u.id === request!.requester_id) || getUser(request!.requester_id);
@@ -395,7 +399,7 @@ export default function RequestDetail() {
   const handleVerify = async () => {
     if (!request || !user) return;
     if (!verifierName.trim()) {
-      alert("Masukkan nama verifikator");
+      await alert("Masukkan nama verifikator");
       return;
     }
 
@@ -432,7 +436,7 @@ export default function RequestDetail() {
   const handleApprove = async () => {
     if (!request || !user) return;
     if (!approverName.trim()) {
-      alert("Masukkan nama penanggung jawab");
+      await alert("Masukkan nama penanggung jawab");
       return;
     }
 
@@ -466,7 +470,7 @@ export default function RequestDetail() {
   };
 
   const handleReject = async () => {
-    const reason = prompt("Masukkan alasan penolakan:");
+    const reason = await prompt("Masukkan alasan penolakan:", { placeholder: "Tulis alasan..." });
     if (!reason || !request || !user) return;
     setActionLoading(true);
     await db.requests.update(request.id!, {
@@ -479,7 +483,7 @@ export default function RequestDetail() {
   };
 
   const handleRevision = async () => {
-    const notes = prompt("Masukkan catatan revisi:");
+    const notes = await prompt("Masukkan catatan revisi:", { placeholder: "Tulis catatan..." });
     if (!notes || !request || !user) return;
     setActionLoading(true);
     await db.requests.update(request.id!, {
@@ -515,10 +519,10 @@ export default function RequestDetail() {
         db.users.update(selectedUser.id, { signature: editRequesterSignature }).catch(() => {});
       }
 
-      alert("Perubahan data permintaan berhasil disimpan");
+      await alert("Perubahan data permintaan berhasil disimpan");
       loadData();
     } catch (err) {
-      alert("Gagal menyimpan: " + (err as Error).message);
+      await alert("Gagal menyimpan: " + (err as Error).message);
     } finally {
       setActionLoading(false);
     }
@@ -577,7 +581,7 @@ export default function RequestDetail() {
   const verifier = getUser(request.verifier_id);
   const supervisor = getUser(request.supervisor_id);
 
-  const isAdmin = user?.role?.includes("admin") || user?.role?.includes("operator");
+  const isAdmin = user?.role?.includes("admin");
   const isVerifier = user?.role?.some((r) => ["verifikator"].includes(r));
   const isSupervisor = user?.role?.some((r) => ["penanggungjawab"].includes(r));
 
@@ -627,6 +631,7 @@ export default function RequestDetail() {
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       {/* Header - no print */}
       <div className="flex items-center justify-between mb-6 print:hidden">
         <button
@@ -1132,13 +1137,16 @@ export default function RequestDetail() {
               </div>
               {canEdit ? (
                 <div className="print:hidden">
-                  <input
-                    type="text"
+                  <select
                     value={editFungsiBagian}
                     onChange={(e) => setEditFungsiBagian(e.target.value)}
-                    placeholder="Unit Kerja / Fungsi"
                     className="w-full text-sm font-semibold text-slate-800 bg-white border border-orange-300 rounded-xl p-2 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-                  />
+                  >
+                    <option value="">-- Pilih Fungsi/Bagian --</option>
+                    {WORK_UNIT_OPTIONS.map(u => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
                 </div>
               ) : null}
               <div className={canEdit ? "hidden print:block font-bold text-slate-800 text-lg" : "font-bold text-slate-800 text-lg"}>
@@ -2149,12 +2157,12 @@ export default function RequestDetail() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
                         if (requesterSigRef.current && !requesterSigRef.current.isEmpty()) {
                           const sigData = requesterSigRef.current.toDataURL();
                           saveNewSignatureToState(sigData);
                         } else {
-                          alert("Silakan tanda tangan di kanvas terlebih dahulu.");
+                          await alert("Silakan tanda tangan di kanvas terlebih dahulu.");
                         }
                       }}
                       className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm shadow-md transition-colors"

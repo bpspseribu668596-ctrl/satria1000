@@ -4,6 +4,9 @@ import SignatureCanvas from "react-signature-canvas";
 import { useAuth } from "../context/AuthContext";
 import { db, type ATKItem, type Settings } from "../lib/db";
 import { Plus, Trash2, X, Search } from "lucide-react";
+import { WORK_UNIT_OPTIONS } from "../lib/workUnits";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 
 interface RequestItem {
   itemId: number;
@@ -15,6 +18,7 @@ interface RequestItem {
 export default function NewRequest() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { dialogState, closeDialog, alert } = useDialog();
   const signatureRef = useRef<SignatureCanvas>(null);
 
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -45,13 +49,11 @@ export default function NewRequest() {
 
   const loadData = async () => {
     try {
-      const [masterItems, sett, usrs, pItems, requests, rItems, requestsNew, initialBalances, tMasukItems, tKeluarItems] = await Promise.all([
+      const [masterItems, sett, usrs, pItems, requestsNew, initialBalances, tMasukItems, tKeluarItems] = await Promise.all([
         db.atk_items.toArray(),
         db.settings.get(1),
         db.users.toArray(),
         db.purchase_items.toArray(),
-        db.atk_requests.where("status").equals("approved").toArray(),
-        db.atk_request_items.toArray(),
         db.requests.where("status").equals("approved").toArray(),
         db.initial_balances.where("year").equals(new Date().getFullYear()).toArray(),
         db.transfer_masuk_items.toArray(),
@@ -75,9 +77,7 @@ export default function NewRequest() {
       pItems.forEach((pi: any) => add(pi.item_name, pi.quantity));
       tMasukItems.forEach((ti: any) => add(ti.item_name, ti.quantity));
       tKeluarItems.forEach((ti: any) => sub(ti.item_name, ti.quantity));
-      
-      const appIds = new Set(requests.map((r: any) => r.id));
-      rItems.forEach((ri: any) => { if (appIds.has(ri.request_id)) sub(ri.final_item_name || ri.item_name, ri.quantity); });
+
       requestsNew.forEach((r: any) => (r.items || []).forEach((ri: any) => sub(ri.name, ri.quantity)));
 
       // Gabungkan seluruh katalog item dari Master ATK, Transfer Masuk, Pembelian, dan Saldo Awal
@@ -183,7 +183,7 @@ export default function NewRequest() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const valid = items.filter(i => i.itemId && i.quantity > 0);
-    if (!valid.length) return alert("Pilih minimal 1 barang");
+    if (!valid.length) { await alert("Pilih minimal 1 barang"); return; }
     setLoading(true);
     try {
       const count = await db.requests.count();
@@ -205,11 +205,12 @@ export default function NewRequest() {
         updated_at: now.toISOString(),
       });
       navigate("/app/all-requests");
-    } catch (err) { alert("Error: " + (err as Error).message); } finally { setLoading(false); }
+    } catch (err) { await alert("Error: " + (err as Error).message); } finally { setLoading(false); }
   };
 
   return (
     <div className="space-y-6">
+      <Dialog state={dialogState} onClose={closeDialog} />
       <h1 className="text-2xl font-bold text-slate-800">Buat Permintaan ATK</h1>
 
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
@@ -283,15 +284,27 @@ export default function NewRequest() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Fungsi / Bagian (Unit Kerja)</label>
-                <input
-                  type="text"
-                  placeholder="Fungsi / Bagian"
-                  value={fungsiBagian}
-                  onChange={e => canSelectRequester && setFungsiBagian(e.target.value)}
-                  readOnly={!canSelectRequester}
-                  className={`w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none text-sm ${!canSelectRequester ? "bg-slate-100 text-slate-500 cursor-not-allowed" : "focus:ring-2 focus:ring-blue-500"}`}
-                  required
-                />
+                {canSelectRequester ? (
+                  <select
+                    value={fungsiBagian}
+                    onChange={e => setFungsiBagian(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none text-sm focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">-- Pilih Fungsi/Bagian --</option>
+                    {WORK_UNIT_OPTIONS.map(u => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={fungsiBagian}
+                    readOnly
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none text-sm bg-slate-100 text-slate-500 cursor-not-allowed"
+                    required
+                  />
+                )}
               </div>
             </div>
           </div>

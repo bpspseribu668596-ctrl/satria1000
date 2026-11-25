@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { db, type TransferMasuk, type TransferMasukItem } from "../lib/db";
 import { useNavigate } from "react-router-dom";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import { Trash2, Plus, ArrowDownLeft } from "lucide-react";
 
 interface TransferWithItems extends TransferMasuk {
@@ -9,6 +11,7 @@ interface TransferWithItems extends TransferMasuk {
 
 export default function TransferMasukPage() {
   const navigate = useNavigate();
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [transfers, setTransfers] = useState<TransferWithItems[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +39,7 @@ export default function TransferMasukPage() {
       setTransfers(withItems);
     } catch (err) {
       console.error("Error loading transfer masuk:", err);
-      alert("Gagal memuat data transfer masuk. Silakan muat ulang halaman.");
+      await alert("Gagal memuat data transfer masuk. Silakan muat ulang halaman.");
     } finally {
       setLoading(false);
     }
@@ -44,8 +47,8 @@ export default function TransferMasukPage() {
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Yakin hapus data transfer masuk ini beserta semua item?"))
-      return;
+    const ok = await confirm("Yakin hapus data transfer masuk ini beserta semua item?", { destructive: true, confirmLabel: "Ya, Hapus" });
+    if (!ok) return;
 
     await db.transfer_masuk_items.where("transfer_id").equals(id).delete();
     await db.transfer_masuk.delete(id);
@@ -71,6 +74,7 @@ export default function TransferMasukPage() {
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <h1 className="text-2xl font-bold text-slate-800 mb-6">Transfer Masuk</h1>
 
       <div className="mb-6">

@@ -3,6 +3,10 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db, type Request, type User, type ATKItem } from "../lib/db";
 import { ArrowLeft, Plus, Trash2, Save, X, Search } from "lucide-react";
+import { UNIT_OPTIONS } from "../lib/units";
+import { WORK_UNIT_OPTIONS } from "../lib/workUnits";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 
 interface EditableItem {
   name: string;
@@ -13,6 +17,7 @@ interface EditableItem {
 export default function EditRequest() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { dialogState, closeDialog, alert } = useDialog();
 
   const [request, setRequest] = useState<Request | null>(null);
   const [, setSettings] = useState<unknown>(null);
@@ -46,7 +51,7 @@ export default function EditRequest() {
     ]);
 
     if (!req) {
-      alert("Request tidak ditemukan");
+      await alert("Request tidak ditemukan");
       navigate("/app/all-requests");
       return;
     }
@@ -180,9 +185,9 @@ export default function EditRequest() {
     setItems([...items, { name: "", quantity: 1, unit: "pcs" }]);
   };
 
-  const removeItem = (index: number) => {
+  const removeItem = async (index: number) => {
     if (items.length === 1) {
-      alert("Minimal harus ada 1 item");
+      await alert("Minimal harus ada 1 item");
       return;
     }
     setItems(items.filter((_, i) => i !== index));
@@ -201,20 +206,9 @@ export default function EditRequest() {
   const handleSave = async () => {
     const validItems = items.filter((i) => i.name.trim() && i.quantity > 0);
 
-    if (validItems.length === 0) {
-      alert("Minimal harus ada 1 item yang valid");
-      return;
-    }
-
-    if (!location.trim()) {
-      alert("Lokasi pengajuan harus diisi");
-      return;
-    }
-
-    if (!requesterName.trim()) {
-      alert("Nama pegawai harus diisi");
-      return;
-    }
+    if (validItems.length === 0) { await alert("Minimal harus ada 1 item yang valid"); return; }
+    if (!location.trim()) { await alert("Lokasi pengajuan harus diisi"); return; }
+    if (!requesterName.trim()) { await alert("Nama pegawai harus diisi"); return; }
 
     setSaving(true);
     try {
@@ -232,15 +226,13 @@ export default function EditRequest() {
         submission_location: location,
         fungsi_bagian: fungsiBagian || null,
         requester_notes: `${requesterName}${requesterNIP ? " (" + requesterNIP + ")" : ""}`,
-        status: "pending_verification",  // kembalikan ke antrian verifikasi
-        rejection_reason: null,          // hapus catatan revisi lama
         updated_at: new Date().toISOString(),
       });
 
-      alert("Permintaan berhasil diupdate!");
+      await alert("Permintaan berhasil diupdate!");
       navigate(`/app/request/${id}`);
     } catch (err) {
-      alert("Gagal menyimpan: " + (err as Error).message);
+      await alert("Gagal menyimpan: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -264,6 +256,7 @@ export default function EditRequest() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex items-center gap-4 mb-6">
         <button 
           onClick={() => navigate("/app/all-requests")}
@@ -356,12 +349,9 @@ export default function EditRequest() {
                 className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none"
               >
                 <option value="">-- Pilih Fungsi/Bagian --</option>
-                <option value="Subbagian Umum">Subbagian Umum</option>
-                <option value="Fungsi Sosial">Fungsi Sosial</option>
-                <option value="Fungsi Distribusi">Fungsi Distribusi</option>
-                <option value="Fungsi Produksi">Fungsi Produksi</option>
-                <option value="Fungsi Nerwilis">Fungsi Nerwilis</option>
-                <option value="Fungsi IPDS">Fungsi IPDS</option>
+                {WORK_UNIT_OPTIONS.map(u => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -432,15 +422,17 @@ export default function EditRequest() {
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <input 
-                        type="text"
+                      <select
                         value={item.unit}
                         onChange={(e) =>
                           updateItem(index, "unit", e.target.value)
                         }
                         className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-blue-500 focus:outline-none"
-                        placeholder="pcs"
-                      />
+                      >
+                        {UNIT_OPTIONS.map((u) => (
+                          <option key={u} value={u}>{u}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button 

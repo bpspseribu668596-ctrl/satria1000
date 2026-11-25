@@ -5,6 +5,8 @@ import { db, type Request, type User } from "../lib/db";
 import { useAuth } from "../context/AuthContext";
 import { compressSignatureToDataUrl } from "../lib/signatureUtils";
 import SignatureCanvas from "react-signature-canvas";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import {
   ListChecks,
   CheckSquare,
@@ -24,6 +26,7 @@ import {
 
 export default function Verification() {
   const { user } = useAuth();
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [requests, setRequests] = useState<Request[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,14 +116,14 @@ export default function Verification() {
       setUploadedSig(compressed);
     } catch (err) {
       console.error("Gagal membaca file tanda tangan:", err);
-      alert("Gagal membaca file tanda tangan. Pastikan format gambar valid (PNG/JPG).");
+      await alert("Gagal membaca file tanda tangan. Pastikan format gambar valid (PNG/JPG).");
     }
   };
 
   // Execute batch verification
   const handleExecuteBatchVerify = async () => {
     if (!verifierName.trim()) {
-      alert("Mohon masukkan nama verifikator");
+      await alert("Mohon masukkan nama verifikator");
       return;
     }
 
@@ -138,7 +141,8 @@ export default function Verification() {
     if (targetList.length === 0) return;
 
     const confirmMsg = `Verifikasi dan tanda tangani ${targetList.length} dokumen permintaan sekaligus?`;
-    if (!window.confirm(confirmMsg)) return;
+    const ok = await confirm(confirmMsg, { confirmLabel: "Ya, Verifikasi" });
+    if (!ok) return;
 
     setIsProcessing(true);
     setProgress({ current: 0, total: targetList.length, currentDoc: "" });
@@ -176,7 +180,7 @@ export default function Verification() {
     setIsProcessing(false);
     setShowBatchModal(false);
     setSelectedIds(new Set());
-    alert(`Berhasil memverifikasi ${successCount} dari ${targetList.length} dokumen!`);
+    await alert(`Berhasil memverifikasi ${successCount} dari ${targetList.length} dokumen!`);
     await loadData();
   };
 
@@ -193,7 +197,7 @@ export default function Verification() {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">

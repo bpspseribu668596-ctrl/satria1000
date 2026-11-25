@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { db, type Purchase, type PurchaseItem, type ATKItem } from "../lib/db";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import * as XLSX from "xlsx";
 import {
   FileText,
@@ -102,6 +104,7 @@ function parseExcelDate(val: any): string {
 export default function Purchases() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [purchases, setPurchases] = useState<PurchaseWithItems[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -147,13 +150,14 @@ export default function Purchases() {
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Yakin hapus data pembelian ini beserta semua item?")) return;
+    const ok = await confirm("Yakin hapus data pembelian ini beserta semua item?", { destructive: true, confirmLabel: "Ya, Hapus" });
+    if (!ok) return;
     try {
       await db.purchase_items.where("purchase_id").equals(id).delete();
       await db.purchases.delete(id);
       await loadPurchases();
     } catch (err) {
-      alert("Gagal hapus: " + (err as Error).message);
+      await alert("Gagal hapus: " + (err as Error).message);
     }
   };
 
@@ -179,7 +183,7 @@ export default function Purchases() {
       const rawRows = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
 
       if (!rawRows || rawRows.length === 0) {
-        alert("File Excel kosong atau format tidak sesuai!");
+        await alert("File Excel kosong atau format tidak sesuai!");
         return;
       }
 
@@ -305,7 +309,7 @@ export default function Purchases() {
       const newItems = Array.from(detectedNewMap.values());
 
       if (groups.length === 0) {
-        alert("Tidak ada data nota pembelian yang dapat diproses dari file Excel ini.");
+        await alert("Tidak ada data nota pembelian yang dapat diproses dari file Excel ini.");
         return;
       }
 
@@ -318,7 +322,7 @@ export default function Purchases() {
       setShowPreviewModal(true);
     } catch (err) {
       console.error("Excel parse error:", err);
-      alert("Gagal membaca file Excel: " + (err as Error).message);
+      await alert("Gagal membaca file Excel: " + (err as Error).message);
     } finally {
       setParsingExcel(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -354,7 +358,7 @@ export default function Purchases() {
       : parsedGroups;
 
     if (validGroups.length === 0) {
-      alert("Semua nota sudah ada di database atau tidak ada nota yang valid untuk disimpan.");
+      await alert("Semua nota sudah ada di database atau tidak ada nota yang valid untuk disimpan.");
       return;
     }
 
@@ -448,7 +452,7 @@ export default function Purchases() {
         savedPurchasesCount++;
       }
 
-      alert(
+      await alert(
         `Sukses! Berhasil mengimpor ${savedPurchasesCount} nota pembelian dari SAKTI` +
           (newItemsList.length > 0
             ? ` dan mendaftarkan ${newItemsList.length} barang baru ke Master ATK & Saldo Awal (qty: 0).`
@@ -461,7 +465,7 @@ export default function Purchases() {
       await loadPurchases();
     } catch (err) {
       console.error("Save import error:", err);
-      alert("Terjadi kesalahan saat menyimpan import: " + (err as Error).message);
+      await alert("Terjadi kesalahan saat menyimpan import: " + (err as Error).message);
     } finally {
       setIsSavingImport(false);
       setSaveProgress("");
@@ -493,6 +497,7 @@ export default function Purchases() {
 
   return (
     <div className="space-y-6">
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-slate-800">Menu Pembelian</h1>
 

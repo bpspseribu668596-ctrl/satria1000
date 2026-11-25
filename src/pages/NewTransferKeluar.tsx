@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { Upload, Download, Trash2, Plus, Save, ArrowLeft, FileText, FileSpreadsheet, Building2, Search, X } from "lucide-react";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 
 
 type ItemRow = Omit<TransferKeluarItem, "id" | "transfer_id">;
@@ -11,6 +13,7 @@ type ItemRow = Omit<TransferKeluarItem, "id" | "transfer_id">;
 export default function NewTransferKeluar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { dialogState, closeDialog, alert } = useDialog();
 
   // Header form
   const [documentNumber, setDocumentNumber] = useState("");
@@ -147,9 +150,9 @@ export default function NewTransferKeluar() {
     setItems([...items, { item_name: "", quantity: 1, unit: "pcs", unit_price: 0, total: 0 }]);
   };
 
-  const removeRow = (index: number) => {
+  const removeRow = async (index: number) => {
     if (items.length === 1) {
-      alert("Minimal harus ada 1 barang");
+      await alert("Minimal harus ada 1 barang");
       return;
     }
     setItems(items.filter((_, i) => i !== index));
@@ -205,10 +208,10 @@ export default function NewTransferKeluar() {
 
       if (importedItems.length > 0) {
         setItems(importedItems);
-        alert(`Berhasil import ${importedItems.length} item`);
+        await alert(`Berhasil import ${importedItems.length} item`);
       }
     } catch (err) {
-      alert("Gagal import Excel: " + (err as Error).message);
+      await alert("Gagal import Excel: " + (err as Error).message);
     } finally {
       if (excelInputRef.current) excelInputRef.current.value = "";
     }
@@ -237,12 +240,12 @@ export default function NewTransferKeluar() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!documentNumber.trim()) return alert("Nomor BAST harus diisi");
-    if (!destinationSatker.trim()) return alert("Satker penerima harus diisi");
-    if (!bastFile) return alert("File BAST wajib diunggah");
+    if (!documentNumber.trim()) { await alert("Nomor BAST harus diisi"); return; }
+    if (!destinationSatker.trim()) { await alert("Satker penerima harus diisi"); return; }
+    if (!bastFile) { await alert("File BAST wajib diunggah"); return; }
 
     const validItems = items.filter((item) => item.item_name.trim() && item.quantity > 0);
-    if (validItems.length === 0) return alert("Minimal harus ada 1 barang valid");
+    if (validItems.length === 0) { await alert("Minimal harus ada 1 barang valid"); return; }
 
     setSaving(true);
     try {
@@ -275,10 +278,10 @@ export default function NewTransferKeluar() {
         });
       }
 
-      alert("Transfer Keluar berhasil disimpan!");
+      await alert("Transfer Keluar berhasil disimpan!");
       navigate("/app/transfer-keluar");
     } catch (err) {
-      alert("Gagal menyimpan: " + (err as Error).message);
+      await alert("Gagal menyimpan: " + (err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -295,6 +298,7 @@ export default function NewTransferKeluar() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex items-center gap-4 mb-2">
         <button onClick={() => navigate("/app/transfer-keluar")} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
           <ArrowLeft size={24} />

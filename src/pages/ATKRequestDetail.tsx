@@ -15,6 +15,8 @@ import {
   ExternalLink,
   Printer,
 } from "lucide-react";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 
 interface RequestWithItems extends ATKRequest {
   items: ATKRequestItem[];
@@ -25,6 +27,7 @@ export default function ATKRequestDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
 
   const [request, setRequest] = useState<RequestWithItems | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +46,7 @@ export default function ATKRequestDetail() {
 
     const requestData = await db.atk_requests.get(parseInt(id));
     if (!requestData) {
-      alert("Request tidak ditemukan");
+      await alert("Request tidak ditemukan");
       navigate("/app/atk-requests");
       return;
     }
@@ -81,30 +84,47 @@ export default function ATKRequestDetail() {
 
   const handleApprove = async () => {
     if (!request || !user) return;
-
-    if (!confirm("Yakin ingin menyetujui request ini?")) return;
-
+    const ok = await confirm("Yakin ingin menyetujui request ini?", { confirmLabel: "Ya, Setujui" });
+    if (!ok) return;
     setProcessing(true);
     try {
-      // Update items with edited names (no auto-add to Master)
+      // Ambil semua Master ATK yang ada untuk cek duplikat
+      const existingMaster = await db.atk_items.toArray();
+      const masterNames = new Set(existingMaster.map(m => m.name.toLowerCase()));
+
+      let addedCount = 0;
+
       for (const item of editingItems) {
-        await db.atk_request_items.update(item.id!, {
-          final_item_name: item.final_item_name || item.item_name,
-        });
+        const finalName = (item.final_item_name || item.item_name).trim();
+
+        // Update final_item_name
+        await db.atk_request_items.update(item.id!, { final_item_name: finalName });
+
+        // Auto-add ke Master ATK jika belum ada
+        if (finalName && !masterNames.has(finalName.toLowerCase())) {
+          await db.atk_items.add({
+            item_code: "",
+            name: finalName,
+            unit: item.unit || "pcs",
+            created_at: new Date().toISOString(),
+          });
+          masterNames.add(finalName.toLowerCase());
+          addedCount++;
+        }
       }
 
-      // Update request status
       await db.atk_requests.update(request.id!, {
-        status: "approved",
-        reviewed_by: user.id!,
-        reviewed_at: new Date().toISOString(),
-        review_notes: reviewNotes || null,
+        status: "approved", reviewed_by: user.id!, reviewed_at: new Date().toISOString(), review_notes: reviewNotes || null,
       });
 
-      alert("Request berhasil disetujui!");
+      await alert(
+        addedCount > 0
+          ? `Request berhasil disetujui! ${addedCount} item baru otomatis ditambahkan ke Master ATK.\n\nCatatan: Stok item masih 0. Silakan catat Pembelian, Transfer Masuk, atau Saldo Awal untuk memberi stok.`
+          : "Request berhasil disetujui! Semua item sudah terdaftar di Master ATK."
+      );
       navigate("/app/atk-requests");
     } catch (err) {
-      alert("Gagal menyetujui: " + (err as Error).message);
+      await alert("Gagal menyetujui: " + (err as Error).message);
     } finally {
       setProcessing(false);
     }
@@ -112,35 +132,29 @@ export default function ATKRequestDetail() {
 
   const handleReject = async () => {
     if (!request || !user) return;
-
     if (!reviewNotes.trim()) {
-      alert("Harap isi alasan penolakan");
+      await alert("Harap isi alasan penolakan");
       return;
     }
-
-    if (!confirm("Yakin ingin menolak request ini?")) return;
-
+    const ok = await confirm("Yakin ingin menolak request ini?", { destructive: true, confirmLabel: "Ya, Tolak" });
+    if (!ok) return;
     setProcessing(true);
     try {
       await db.atk_requests.update(request.id!, {
-        status: "rejected",
-        reviewed_by: user.id!,
-        reviewed_at: new Date().toISOString(),
-        review_notes: reviewNotes,
+        status: "rejected", reviewed_by: user.id!, reviewed_at: new Date().toISOString(), review_notes: reviewNotes,
       });
-
-      alert("Request ditolak");
+      await alert("Request ditolak");
       navigate("/app/atk-requests");
     } catch (err) {
-      alert("Gagal menolak: " + (err as Error).message);
+      await alert("Gagal menolak: " + (err as Error).message);
     } finally {
       setProcessing(false);
     }
   };
 
-  const sendWhatsAppReminder = () => {
+  const sendWhatsAppReminder = async () => {
     if (!request || !settings?.whatsapp_number) {
-      alert("Nomor WhatsApp admin belum diatur di Pengaturan");
+      await alert("Nomor WhatsApp admin belum diatur di Pengaturan");
       return;
     }
 
@@ -185,11 +199,12 @@ Mohon segera ditindaklanjuti. Terima kasih.`;
     );
   }
 
-  const isAdmin = user?.role?.includes("admin");
+  const isAdmin = user?.role?.includes("admin") || user?.role?.includes("operator");
   const canEdit = isAdmin && request.status === "pending";
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate("/app/atk-requests")}

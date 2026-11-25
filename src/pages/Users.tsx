@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { db, type User, hashPassword } from "../lib/db";
+import { WORK_UNIT_OPTIONS } from "../lib/workUnits";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import {
   Plus,
   Trash2,
@@ -11,6 +14,7 @@ import * as XLSX from "xlsx";
 import { useRef } from "react";
 
 export default function Users() {
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -101,18 +105,18 @@ export default function Users() {
       resetForm();
       loadData();
     } catch (err) {
-      alert("Gagal: " + (err as Error).message);
+      await alert("Gagal: " + (err as Error).message);
     }
   };
 
-  const toggleRole = (role: string) => {
+  const toggleRole = async (role: string) => {
     const currentRoles = [...form.role];
     const index = currentRoles.indexOf(role as unknown as User["role"][number]);
     if (index > -1) {
       if (currentRoles.length > 1) {
         currentRoles.splice(index, 1);
       } else {
-        alert("User harus memiliki minimal satu role");
+        await alert("User harus memiliki minimal satu role");
       }
     } else {
       currentRoles.push(role as unknown as User["role"][number]);
@@ -121,7 +125,8 @@ export default function Users() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Yakin hapus user ini?")) return;
+    const ok = await confirm("Yakin hapus user ini?", { destructive: true, confirmLabel: "Ya, Hapus" });
+    if (!ok) return;
     await db.users.delete(id);
     loadData();
   };
@@ -200,10 +205,10 @@ export default function Users() {
           await db.users.add(userData as User);
         }
       }
-      alert("Import selesai");
+      await alert("Import selesai");
       loadData();
     } catch (err) {
-      alert("Gagal import: " + (err as Error).message);
+      await alert("Gagal import: " + (err as Error).message);
     }
   };
 
@@ -217,6 +222,7 @@ export default function Users() {
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold text-slate-800">Kelola User</h1>
         <div className="flex flex-wrap gap-2">
@@ -407,14 +413,16 @@ export default function Users() {
                 <label className="block text-sm font-semibold text-slate-700 mb-1">
                   Unit Kerja
                 </label>
-                <input 
-                  type="text"
+                <select
                   value={form.work_unit}
-                  onChange={(e) =>
-                    setForm({ ...form, work_unit: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, work_unit: e.target.value })}
                   className="w-full px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-blue-500 focus:outline-none"
-                />
+                >
+                  <option value="">-- Pilih Unit Kerja --</option>
+                  {WORK_UNIT_OPTIONS.map((u) => (
+                    <option key={u} value={u}>{u}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-3 pt-4">
                 <button 

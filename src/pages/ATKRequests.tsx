@@ -17,6 +17,8 @@ import {
   MessageCircle,
   Trash2,
 } from "lucide-react";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 
 interface RequestWithItems extends ATKRequest {
   items: ATKRequestItem[];
@@ -26,6 +28,7 @@ interface RequestWithItems extends ATKRequest {
 export default function ATKRequests() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { dialogState, closeDialog, alert, confirm } = useDialog();
   const [requests, setRequests] = useState<RequestWithItems[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<
@@ -92,14 +95,10 @@ export default function ATKRequests() {
     return req.status === filter;
   });
 
-  const sendWhatsAppReminder = (
-    e: React.MouseEvent,
-    request: RequestWithItems,
-  ) => {
-    e.stopPropagation(); // Prevent row click navigation
-
+  const sendWhatsAppReminder = async (e: React.MouseEvent, request: RequestWithItems) => {
+    e.stopPropagation();
     if (!settings?.whatsapp_number) {
-      alert("Nomor WhatsApp admin belum diatur di Pengaturan");
+      await alert("Nomor WhatsApp admin belum diatur di Pengaturan");
       return;
     }
 
@@ -127,30 +126,16 @@ Mohon segera ditindaklanjuti. Terima kasih.`;
     window.open(waUrl, "_blank");
   };
 
-  const handleDelete = async (
-    e: React.MouseEvent,
-    request: RequestWithItems,
-  ) => {
-    e.stopPropagation(); // Prevent row click navigation
-
-    if (!confirm(`Yakin ingin menghapus request ${request.document_number}?`)) {
-      return;
-    }
-
+  const handleDelete = async (e: React.MouseEvent, request: RequestWithItems) => {
+    e.stopPropagation();
+    const ok = await confirm(`Yakin ingin menghapus request ${request.document_number}?`, { destructive: true, confirmLabel: "Ya, Hapus" });
+    if (!ok) return;
     try {
-      // Delete request items first
-      await db.atk_request_items
-        .where("request_id")
-        .equals(request.id!)
-        .delete();
-
-      // Delete the request
+      await db.atk_request_items.where("request_id").equals(request.id!).delete();
       await db.atk_requests.delete(request.id!);
-
-      // Refresh list
       loadRequests();
     } catch (err) {
-      alert("Gagal menghapus: " + (err as Error).message);
+      await alert("Gagal menghapus: " + (err as Error).message);
     }
   };
 
@@ -190,12 +175,13 @@ Mohon segera ditindaklanjuti. Terima kasih.`;
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800">
           {user?.role?.includes("admin") ||
           user?.role?.includes("operator") ||
           user?.role?.includes("penanggungjawab")
-            ? "Review Permohonan Pengadaan ATK"
+            ? "Permohonan Pengadaan ATK"
             : "Permohonan Pengadaan ATK Saya"}
         </h1>
         <button 

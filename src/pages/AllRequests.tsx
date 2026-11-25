@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { db, type Request, type User, type Settings, type ATKItem } from "../lib/db";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 import {
   MessageSquare,
   Trash2,
@@ -109,6 +111,7 @@ const formatNumber = (num: number) => {
 
 export default function AllRequests() {
   const { user } = useAuth();
+  const { dialogState, closeDialog, alert } = useDialog();
   const [requests, setRequests] = useState<Request[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -188,11 +191,11 @@ export default function AllRequests() {
   const getUserName = (id: number) =>
     users.find((u) => u.id === id)?.name || "Unknown";
 
-  const sendWhatsApp = (req: Request, e: React.MouseEvent) => {
+  const sendWhatsApp = async (req: Request, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!settings?.whatsapp_number) {
-      alert("Nomor WhatsApp belum diatur");
+      await alert("Nomor WhatsApp belum diatur");
       return;
     }
     const requester = users.find((u) => u.id === req.requester_id);
@@ -214,9 +217,9 @@ export default function AllRequests() {
       await db.requests.delete(deleteId);
       setRequests(requests.filter((r) => r.id !== deleteId));
       setDeleteId(null);
-      alert("Permintaan berhasil dihapus");
+      await alert("Permintaan berhasil dihapus");
     } catch (err) {
-      alert("Gagal menghapus: " + (err as Error).message);
+      await alert("Gagal menghapus: " + (err as Error).message);
     }
   };
 
@@ -369,9 +372,9 @@ export default function AllRequests() {
     return new Set(saktiTransactions.map((r: SaktiItemRow) => r.docNumber)).size;
   }, [saktiTransactions]);
 
-  const handleExportSaktiExcel = () => {
+  const handleExportSaktiExcel = async () => {
     if (saktiTransactions.length === 0) {
-      alert("Tidak ada transaksi permintaan untuk diekspor.");
+      await alert("Tidak ada transaksi permintaan untuk diekspor.");
       return;
     }
 
@@ -441,7 +444,7 @@ export default function AllRequests() {
 
   const handleStartExport = async () => {
     if (filteredExportRequests.length === 0) {
-      alert("Tidak ada dokumen yang memenuhi kriteria tanggal yang dipilih.");
+      await alert("Tidak ada dokumen yang memenuhi kriteria tanggal yang dipilih.");
       return;
     }
     setIsExporting(true);
@@ -474,7 +477,7 @@ export default function AllRequests() {
   // =========================================================================
   // DOWNLOAD EXCEL TEMPLATE (2 SHEETS)
   // =========================================================================
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     try {
       const wb = XLSX.utils.book_new();
 
@@ -524,7 +527,7 @@ export default function AllRequests() {
 
       XLSX.writeFile(wb, "Format_Import_Permintaan_ATK.xlsx");
     } catch (err: any) {
-      alert("Gagal mengunduh format Excel: " + err.message);
+      await alert("Gagal mengunduh format Excel: " + err.message);
     }
   };
 
@@ -544,7 +547,7 @@ export default function AllRequests() {
 
       const rawRows = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
       if (!rawRows || rawRows.length === 0) {
-        alert("File Excel kosong atau format tidak sesuai!");
+        await alert("File Excel kosong atau format tidak sesuai!");
         return;
       }
 
@@ -641,7 +644,7 @@ export default function AllRequests() {
       }
 
       if (rawGroups.size === 0) {
-        alert("Tidak ada nomor dokumen yang dapat diproses dari file Excel.");
+        await alert("Tidak ada nomor dokumen yang dapat diproses dari file Excel.");
         return;
       }
 
@@ -813,7 +816,7 @@ export default function AllRequests() {
       setShowImportPreviewModal(true);
     } catch (err: any) {
       console.error("Excel parse error:", err);
-      alert("Gagal membaca file Excel: " + err.message);
+      await alert("Gagal membaca file Excel: " + err.message);
     } finally {
       setParsingExcel(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -906,7 +909,7 @@ export default function AllRequests() {
   const saveDrawnSignature = async () => {
     if (!activeSignUser || !modalSigCanvasRef.current) return;
     if (modalSigCanvasRef.current.isEmpty()) {
-      alert("Silakan bubuhkan tanda tangan pada kanvas terlebih dahulu");
+      await alert("Silakan bubuhkan tanda tangan pada kanvas terlebih dahulu");
       return;
     }
 
@@ -954,7 +957,7 @@ export default function AllRequests() {
   // =========================================================================
   const handleApproveImport = async () => {
     if (hasStockDeficit) {
-      alert("⛔ Import tidak dapat disetujui karena stok tidak mencukupi (akan menyebabkan saldo minus).");
+      await alert("⛔ Import tidak dapat disetujui karena stok tidak mencukupi (akan menyebabkan saldo minus).");
       return;
     }
 
@@ -964,12 +967,12 @@ export default function AllRequests() {
 
     const invalidUserDocs = validDocs.filter((d) => d.has_invalid_user);
     if (invalidUserDocs.length > 0) {
-      alert(`Terdapat ${invalidUserDocs.length} dokumen dengan username yang tidak terdaftar di SATRIA. Perbaiki username terlebih dahulu.`);
+      await alert(`Terdapat ${invalidUserDocs.length} dokumen dengan username yang tidak terdaftar di SATRIA. Perbaiki username terlebih dahulu.`);
       return;
     }
 
     if (validDocs.length === 0) {
-      alert("Semua dokumen dalam file Excel sudah terdaftar di sistem (duplikat). Tidak ada dokumen baru untuk disimpan.");
+      await alert("Semua dokumen dalam file Excel sudah terdaftar di sistem (duplikat). Tidak ada dokumen baru untuk disimpan.");
       return;
     }
 
@@ -1043,11 +1046,11 @@ export default function AllRequests() {
       }
 
       if (failedCount > 0) {
-        alert(
+        await alert(
           `Selesai: ${savedCount} dokumen berhasil disimpan.\n(${failedCount} dokumen gagal: ${failedList.slice(0, 5).join(", ")}${failedList.length > 5 ? "..." : ""})`
         );
       } else {
-        alert(`Sukses! Berhasil mengimpor seluruh ${savedCount} dokumen permintaan ATK ke SATRIA dengan status 'Menunggu Verifikasi'.`);
+        await alert(`Sukses! Berhasil mengimpor seluruh ${savedCount} dokumen permintaan ATK ke SATRIA dengan status 'Menunggu Verifikasi'.`);
       }
 
       setShowImportPreviewModal(false);
@@ -1057,7 +1060,7 @@ export default function AllRequests() {
       await loadData();
     } catch (err: any) {
       console.error("Save import error:", err);
-      alert("Gagal menyimpan import: " + err.message);
+      await alert("Gagal menyimpan import: " + err.message);
     } finally {
       setIsSavingImport(false);
       setSaveImportProgress("");
@@ -1083,6 +1086,7 @@ export default function AllRequests() {
 
   return (
     <div>
+      <Dialog state={dialogState} onClose={closeDialog} />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Semua Permintaan</h1>

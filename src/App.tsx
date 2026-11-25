@@ -35,7 +35,6 @@ import TransferKeluar from "./pages/TransferKeluar";
 import NewTransferKeluar from "./pages/NewTransferKeluar";
 import TransferKeluarDetail from "./pages/TransferKeluarDetail";
 import InventoryReport from "./pages/InventoryReport";
-import EditRequest from "./pages/EditRequest";
 
 import PublicVerifyRequest from "./pages/PublicVerifyRequest";
 import PublicVerifyStockCard from "./pages/PublicVerifyStockCard";
@@ -75,7 +74,6 @@ function App() {
               <Route path="/app/all-requests" element={<AllRequests />} />
               <Route path="/app/request/:id" element={<RequestDetail />} />
               <Route path="/app/requests/:id" element={<RequestDetail />} />
-              <Route path="/app/edit-request/:id" element={<EditRequest />} />
               <Route path="/app/verification" element={<Verification />} />
               <Route path="/app/approval" element={<Approval />} />
               <Route path="/app/users" element={<Users />} />

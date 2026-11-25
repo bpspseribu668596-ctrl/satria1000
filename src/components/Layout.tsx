@@ -63,16 +63,16 @@ const navItems: NavItem[] = [
   },
   {
     type: "link",
-    to: "/app/new-request",
-    icon: FilePlus,
-    label: "Permintaan ATK",
+    to: "/app/atk-requests",
+    icon: PlusCircle,
+    label: "Permohonan Pengadaan ATK",
     roles: ["pegawai", "operator", "verifikator", "penanggungjawab", "admin"],
   },
   {
     type: "link",
-    to: "/app/atk-requests",
-    icon: PlusCircle,
-    label: "Permohonan Pengadaan ATK",
+    to: "/app/new-request",
+    icon: FilePlus,
+    label: "Permintaan ATK",
     roles: ["pegawai", "operator", "verifikator", "penanggungjawab", "admin"],
   },
   {

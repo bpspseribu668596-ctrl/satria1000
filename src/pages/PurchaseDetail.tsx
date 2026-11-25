@@ -19,6 +19,8 @@ import {
   Search,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../hooks/useDialog";
+import Dialog from "../components/Dialog";
 
 interface PurchaseWithItems extends Purchase {
   items: PurchaseItem[];
@@ -33,7 +35,8 @@ export default function PurchaseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+  const { dialogState, closeDialog, alert } = useDialog();
+
   const [purchase, setPurchase] = useState<PurchaseWithItems | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [masterItems, setMasterItems] = useState<ATKItem[]>([]);
@@ -77,7 +80,7 @@ export default function PurchaseDetail() {
       ]);
 
       if (!purchaseData) {
-        alert("Data pembelian tidak ditemukan");
+        await alert("Data pembelian tidak ditemukan");
         navigate("/app/purchases");
         return;
       }
@@ -120,8 +123,8 @@ export default function PurchaseDetail() {
   const handleSaveHeader = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!purchase) return;
-    if (!headerForm.document_number.trim()) return alert("Nomor nota tidak boleh kosong");
-    if (!headerForm.vendor_name.trim()) return alert("Nama toko/vendor tidak boleh kosong");
+    if (!headerForm.document_number.trim()) { await alert("Nomor nota tidak boleh kosong"); return; }
+    if (!headerForm.vendor_name.trim()) { await alert("Nama toko/vendor tidak boleh kosong"); return; }
 
     setUpdating(true);
     try {
@@ -145,9 +148,9 @@ export default function PurchaseDetail() {
       });
 
       setShowEditHeaderModal(false);
-      alert("Data transaksi pembelian berhasil diperbarui!");
+      await alert("Data transaksi pembelian berhasil diperbarui!");
     } catch (err) {
-      alert("Gagal memperbarui data: " + (err as Error).message);
+      await alert("Gagal memperbarui data: " + (err as Error).message);
     } finally {
       setUpdating(false);
     }
@@ -167,9 +170,9 @@ export default function PurchaseDetail() {
     setTempItems([]);
   };
 
-  const handleRemoveTempItem = (index: number) => {
+  const handleRemoveTempItem = async (index: number) => {
     if (tempItems.length <= 1) {
-      alert("Minimal harus ada 1 barang dalam nota pembelian");
+      await alert("Minimal harus ada 1 barang dalam nota pembelian");
       return;
     }
     const itemToRemove = tempItems[index];
@@ -235,7 +238,7 @@ export default function PurchaseDetail() {
       (it) => !it.item_name.trim() || Number(it.quantity) <= 0
     );
     if (invalidItems.length > 0) {
-      alert("Pastikan semua nama barang terisi dan jumlah lebih dari 0!");
+      await alert("Pastikan semua nama barang terisi dan jumlah lebih dari 0!");
       return;
     }
 
@@ -279,9 +282,9 @@ export default function PurchaseDetail() {
       await loadData();
       setIsEditingItems(false);
       setDeletedItemIds([]);
-      alert("Rincian barang berhasil diperbarui!");
+      await alert("Rincian barang berhasil diperbarui!");
     } catch (err) {
-      alert("Gagal memperbarui rincian barang: " + (err as Error).message);
+      await alert("Gagal memperbarui rincian barang: " + (err as Error).message);
     } finally {
       setUpdating(false);
     }
@@ -306,9 +309,9 @@ export default function PurchaseDetail() {
           receipt_file: base64,
           receipt_filename: file.name,
         });
-        alert("Nota/Bukti pembelian berhasil diperbarui");
+        await alert("Nota/Bukti pembelian berhasil diperbarui");
       } catch (err) {
-        alert("Gagal memperbarui file: " + (err as Error).message);
+        await alert("Gagal memperbarui file: " + (err as Error).message);
       } finally {
         setUpdating(false);
       }
@@ -358,6 +361,7 @@ export default function PurchaseDetail() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
+      <Dialog state={dialogState} onClose={closeDialog} />
       {/* ========================================================================= */}
       {/* HEADER ACTIONS (HIDDEN ON PRINT) */}
       {/* ========================================================================= */}
