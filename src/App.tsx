@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NewRequest from "./pages/NewRequest";
 import MyRequests from "./pages/MyRequests";
+import ApprovedRequests from "./pages/ApprovedRequests";
 import AllRequests from "./pages/AllRequests";
 import RequestDetail from "./pages/RequestDetail";
 import Verification from "./pages/Verification";
@@ -24,7 +25,6 @@ import PurchaseDetail from "./pages/PurchaseDetail";
 import NewATKRequest from "./pages/NewATKRequest";
 import ATKRequests from "./pages/ATKRequests";
 import ATKRequestDetail from "./pages/ATKRequestDetail";
-import Monitoring from "./pages/Monitoring";
 import StockCard from "./pages/StockCard";
 import SaldoAwal from "./pages/SaldoAwal";
 import StokOpname from "./pages/StokOpname";
@@ -69,27 +69,64 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/app" element={<Dashboard />} />
-              <Route path="/app/new-request" element={<NewRequest />} />
-              <Route path="/app/my-requests" element={<MyRequests />} />
-              <Route path="/app/all-requests" element={<AllRequests />} />
+              <Route path="/app/new-request" element={
+                <ProtectedRoute allowedRoles={["pegawai", "verifikator", "penanggungjawab", "admin"]} />
+              }>
+                <Route index element={<NewRequest />} />
+              </Route>
+              <Route path="/app/my-requests" element={
+                <ProtectedRoute allowedRoles={["pegawai", "verifikator", "penanggungjawab", "admin"]} />
+              }>
+                <Route index element={<MyRequests />} />
+              </Route>
+              <Route path="/app/approved-requests" element={
+                <ProtectedRoute allowedRoles={["operator"]} />
+              }>
+                <Route index element={<ApprovedRequests />} />
+              </Route>
+              <Route path="/app/all-requests" element={
+                <ProtectedRoute allowedRoles={["verifikator", "penanggungjawab", "admin"]} />
+              }>
+                <Route index element={<AllRequests />} />
+              </Route>
               <Route path="/app/request/:id" element={<RequestDetail />} />
               <Route path="/app/requests/:id" element={<RequestDetail />} />
-              <Route path="/app/verification" element={<Verification />} />
-              <Route path="/app/approval" element={<Approval />} />
-              <Route path="/app/users" element={<Users />} />
+              <Route path="/app/verification" element={
+                <ProtectedRoute allowedRoles={["verifikator", "admin"]} />
+              }>
+                <Route index element={<Verification />} />
+              </Route>
+              <Route path="/app/approval" element={
+                <ProtectedRoute allowedRoles={["penanggungjawab", "admin"]} />
+              }>
+                <Route index element={<Approval />} />
+              </Route>
+              <Route path="/app/users" element={
+                <ProtectedRoute allowedRoles={["admin"]} />
+              }>
+                <Route index element={<Users />} />
+              </Route>
               <Route path="/app/atk-items" element={<ATKItems />} />
               <Route path="/app/purchases" element={<Purchases />} />
               <Route path="/app/purchases/new" element={<NewPurchase />} />
               <Route path="/app/purchases/:id" element={<PurchaseDetail />} />
-              <Route path="/app/atk-requests" element={<ATKRequests />} />
-              <Route path="/app/atk-requests/new" element={<NewATKRequest />} />
+              <Route path="/app/atk-requests" element={
+                <ProtectedRoute allowedRoles={["pegawai", "verifikator", "penanggungjawab", "admin"]} />
+              }>
+                <Route index element={<ATKRequests />} />
+              </Route>
+              <Route path="/app/atk-requests/new" element={
+                <ProtectedRoute allowedRoles={["pegawai", "verifikator", "penanggungjawab", "admin"]} />
+              }>
+                <Route index element={<NewATKRequest />} />
+              </Route>
               <Route
                 path="/app/atk-requests/:id"
                 element={<ATKRequestDetail />}
               />
               <Route path="/app/initial-balance" element={<SaldoAwal />} />
               <Route path="/app/stock-opname" element={<StokOpname />} />
-              <Route path="/app/monitoring" element={<Monitoring />} />
+              <Route path="/app/monitoring" element={<Navigate to="/app" replace />} />
               <Route path="/app/stock-card" element={<StockCard />} />
               <Route path="/app/inventory-report" element={<InventoryReport />} />
               <Route path="/app/transfer-masuk" element={<TransferMasuk />} />
@@ -110,7 +147,11 @@ function App() {
                 path="/app/transfer-keluar/:id"
                 element={<TransferKeluarDetail />}
               />
-              <Route path="/app/settings" element={<Settings />} />
+              <Route path="/app/settings" element={
+                <ProtectedRoute allowedRoles={["pegawai", "verifikator", "penanggungjawab", "admin"]} />
+              }>
+                <Route index element={<Settings />} />
+              </Route>
             </Route>
           </Route>
 

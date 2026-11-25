@@ -112,6 +112,12 @@ const formatNumber = (num: number) => {
 export default function AllRequests() {
   const { user } = useAuth();
   const { dialogState, closeDialog, alert } = useDialog();
+
+  // Operator hanya lihat permintaan yang sudah approved (read-only)
+  const isOperatorOnly =
+    user?.role?.length === 1 && user.role[0] === "operator"
+    || (user?.role?.includes("operator") && !user.role.some((r: string) => ["admin", "verifikator", "penanggungjawab"].includes(r)));
+
   const [requests, setRequests] = useState<Request[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
@@ -167,8 +173,14 @@ export default function AllRequests() {
 
   const loadData = async () => {
     try {
-      const [reqs, usrs, sett, items] = await Promise.all([
-        db.requests.orderBy("created_at").reverse().toArray(),
+      let reqs = await db.requests.orderBy("created_at").reverse().toArray();
+
+      // Operator hanya melihat permintaan yang sudah disetujui
+      if (isOperatorOnly) {
+        reqs = reqs.filter((r: { status: string; }) => r.status === "approved");
+      }
+
+      const [usrs, sett, items] = await Promise.all([
         db.users.toArray(),
         db.settings.get(1),
         db.atk_items.toArray(),
@@ -224,10 +236,10 @@ export default function AllRequests() {
   };
 
   const canManage =
-    user?.role?.includes("admin") ||
+    !isOperatorOnly &&
+    (user?.role?.includes("admin") ||
     user?.role?.includes("verifikator") ||
-    user?.role?.includes("operator") ||
-    user?.role?.includes("penanggungjawab");
+    user?.role?.includes("penanggungjawab"));
 
   const statusLabels: Record<string, string> = {
     pending_verification: "Menunggu Verifikasi",

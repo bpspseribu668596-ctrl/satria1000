@@ -2,8 +2,8 @@ import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard,
-  FilePlus,
   FileText,
+  CheckCircle,
   ListChecks,
   ShieldCheck,
   Users as UsersIcon,
@@ -14,7 +14,6 @@ import {
   X,
   ShoppingCart,
   PlusCircle,
-  BarChart3,
   ClipboardList,
   CircleDollarSign,
   ClipboardCheck,
@@ -38,6 +37,8 @@ type NavItem =
       icon: React.ElementType;
       label: string;
       roles: string[];
+      /** Path anak yang ikut menyalakan item ini sebagai aktif */
+      childPaths?: string[];
     };
 
 const navItems: NavItem[] = [
@@ -59,35 +60,36 @@ const navItems: NavItem[] = [
   {
     type: "section",
     label: "Permintaan ATK",
-    roles: ["pegawai", "verifikator", "operator", "penanggungjawab", "admin"],
+    roles: ["pegawai", "verifikator", "penanggungjawab", "admin"],
   },
   {
     type: "link",
     to: "/app/atk-requests",
     icon: PlusCircle,
     label: "Permohonan Pengadaan ATK",
-    roles: ["pegawai", "operator", "verifikator", "penanggungjawab", "admin"],
-  },
-  {
-    type: "link",
-    to: "/app/new-request",
-    icon: FilePlus,
-    label: "Permintaan ATK",
-    roles: ["pegawai", "operator", "verifikator", "penanggungjawab", "admin"],
+    roles: ["pegawai", "verifikator", "penanggungjawab", "admin"],
   },
   {
     type: "link",
     to: "/app/my-requests",
     icon: Inbox,
     label: "Permintaan Saya",
-    roles: ["pegawai"],
+    roles: ["pegawai", "verifikator", "penanggungjawab", "admin"],
+    childPaths: ["/app/new-request"],
   },
   {
     type: "link",
     to: "/app/all-requests",
     icon: FileText,
     label: "Semua Permintaan",
-    roles: ["pegawai", "verifikator", "operator", "penanggungjawab", "admin"],
+    roles: ["verifikator", "penanggungjawab", "admin"],
+  },
+  {
+    type: "link",
+    to: "/app/approved-requests",
+    icon: CheckCircle,
+    label: "Permintaan Disetujui",
+    roles: ["operator"],
   },
 
   // 3. VERIFIKASI & PERSETUJUAN
@@ -168,13 +170,6 @@ const navItems: NavItem[] = [
   },
   {
     type: "link",
-    to: "/app/monitoring",
-    icon: BarChart3,
-    label: "Monitoring Stok",
-    roles: ["admin", "operator", "penanggungjawab"],
-  },
-  {
-    type: "link",
     to: "/app/stock-card",
     icon: ClipboardList,
     label: "Kartu Kendali",
@@ -192,7 +187,7 @@ const navItems: NavItem[] = [
   {
     type: "section",
     label: "Administrasi",
-    roles: ["admin", "pegawai", "verifikator", "operator", "penanggungjawab"],
+    roles: ["admin", "pegawai", "verifikator", "penanggungjawab"],
   },
   {
     type: "link",
@@ -206,7 +201,7 @@ const navItems: NavItem[] = [
     to: "/app/settings",
     icon: Settings,
     label: "Pengaturan",
-    roles: ["pegawai", "verifikator", "operator", "penanggungjawab", "admin"],
+    roles: ["pegawai", "verifikator", "penanggungjawab", "admin"],
   },
 ];
 
@@ -294,32 +289,52 @@ export default function Layout() {
 
             // Nav link
             const Icon = item.icon;
+            const isChildActive = item.childPaths?.some((p) =>
+              location.pathname.startsWith(p)
+            ) ?? false;
+
+            // /app/request/:id → nyalakan item induk berdasarkan role
+            const isRequestDetail = /^\/app\/request\/\d+/.test(location.pathname);
+            const isRequestDetailActive = isRequestDetail && (() => {
+              const roles = (user?.role || []) as string[];
+              if (item.to === "/app/my-requests")
+                return roles.includes("pegawai") && !roles.some(r => ["admin","verifikator","penanggungjawab","operator"].includes(r));
+              if (item.to === "/app/approved-requests")
+                return roles.includes("operator") && !roles.some(r => ["admin","verifikator","penanggungjawab"].includes(r));
+              if (item.to === "/app/all-requests")
+                return roles.some(r => ["admin","verifikator","penanggungjawab"].includes(r));
+              return false;
+            })();
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.to === "/app"}
                 onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    isActive
+                className={({ isActive }) => {
+                  const active = isActive || isChildActive || isRequestDetailActive;
+                  return `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    active
                       ? "bg-blue-600/20 text-blue-400 font-semibold"
                       : "text-slate-400 hover:bg-white/8 hover:text-slate-200"
-                  }`
-                }
+                  }`;
+                }}
               >
-                {({ isActive }) => (
-                  <>
-                    <Icon
-                      size={18}
-                      className={isActive ? "text-blue-400" : "text-slate-500"}
-                    />
-                    <span className="truncate">{item.label}</span>
-                    {isActive && (
-                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
-                    )}
-                  </>
-                )}
+                {({ isActive }) => {
+                  const active = isActive || isChildActive || isRequestDetailActive;
+                  return (
+                    <>
+                      <Icon
+                        size={18}
+                        className={active ? "text-blue-400" : "text-slate-500"}
+                      />
+                      <span className="truncate">{item.label}</span>
+                      {active && (
+                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                      )}
+                    </>
+                  );
+                }}
               </NavLink>
             );
           })}

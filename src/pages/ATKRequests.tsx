@@ -55,8 +55,8 @@ export default function ATKRequests() {
         requestData = await db.atk_requests
           .where("requester_id")
           .equals(user?.id || 0)
-          .reverse()
           .toArray();
+        requestData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
 
       // Load items and requester name for each request

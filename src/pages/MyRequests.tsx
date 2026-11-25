@@ -15,8 +15,11 @@ export default function MyRequests() {
       const all = await db.requests
         .where("requester_id")
         .equals(user!.id)
-        .reverse()
         .toArray();
+
+      // Urutkan terbaru di atas berdasarkan created_at
+      all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
       setRequests(all || []);
     } catch (err) {
       console.error("Gagal memuat permintaan saya:", err);
