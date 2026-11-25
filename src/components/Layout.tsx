@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   Users as UsersIcon,
   Package,
-  Settings,
   LogOut,
   Menu,
   X,
@@ -187,7 +186,7 @@ const navItems: NavItem[] = [
   {
     type: "section",
     label: "Administrasi",
-    roles: ["admin", "pegawai", "verifikator", "penanggungjawab"],
+    roles: ["admin"],
   },
   {
     type: "link",
@@ -195,13 +194,6 @@ const navItems: NavItem[] = [
     icon: UsersIcon,
     label: "Kelola User",
     roles: ["admin"],
-  },
-  {
-    type: "link",
-    to: "/app/settings",
-    icon: Settings,
-    label: "Pengaturan",
-    roles: ["pegawai", "verifikator", "penanggungjawab", "admin"],
   },
 ];
 

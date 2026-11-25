@@ -18,7 +18,6 @@ import Verification from "./pages/Verification";
 import Approval from "./pages/Approval";
 import Users from "./pages/Users";
 import ATKItems from "./pages/ATKItems";
-import Settings from "./pages/Settings";
 import Purchases from "./pages/Purchases";
 import NewPurchase from "./pages/NewPurchase";
 import PurchaseDetail from "./pages/PurchaseDetail";
@@ -147,11 +146,6 @@ function App() {
                 path="/app/transfer-keluar/:id"
                 element={<TransferKeluarDetail />}
               />
-              <Route path="/app/settings" element={
-                <ProtectedRoute allowedRoles={["pegawai", "verifikator", "penanggungjawab", "admin"]} />
-              }>
-                <Route index element={<Settings />} />
-              </Route>
             </Route>
           </Route>
 
